@@ -25,4 +25,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'External Integration for Maxx';
+$string['pluginname'] = 'Maxx External Integration';
+$string['modulename'] = 'Maxx External Integration';
+$string['pluginspecificheader'] = 'Maxx External Integration Settings';
+$string['apikey'] = 'API Key';
+$string['apikey_help'] = 'Enter the API key for the External Provider you would like to integrate with.';
+$string['providers_selection'] = 'Providers';
+$string['providers_selection_help'] = 'Select the Provider you would like to integrate with.';
