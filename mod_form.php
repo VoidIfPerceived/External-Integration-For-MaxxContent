@@ -27,21 +27,23 @@ require_once($CFG->dirroot.'/mod/extintmaxx/lib.php');
 
 class mod_extintmaxx_mod_form extends \moodleform_mod {
     function definition() {
-        global $CFG;
-
+        global $CFG, $DB;
         $mform = $this->_form;
+
         $this->standard_coursemodule_elements();
 
         $mform->addElement('header', 'pluginspecificheader', get_string('pluginspecificheader', 'extintmaxx'));
 
-        $mform->addElement('text', 'API Key', get_string('apikey', 'extintmaxx'));
-        $mform->addHelpButton('apikey', 'apikey_help', 'extintmaxx');
+        $mform->addElement('text', 'apitoken', get_string('apitoken', 'extintmaxx'));
+        $mform->setType('apitoken', PARAM_TEXT);
+        $mform->addHelpButton('apitoken', 'apitoken_help', 'extintmaxx');
 
         $mform->addElement('select', 'providers', get_string('providers_selection', 'extintmaxx'), array('NALI'));
         $mform->addHelpButton('providers', 'providers_selection_help', 'extintmaxx');
 
-        
-
         $this->add_action_buttons();
+
     }
+
+
 }
