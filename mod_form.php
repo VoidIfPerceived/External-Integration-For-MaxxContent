@@ -34,12 +34,16 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
 
         $mform->addElement('header', 'pluginspecificheader', get_string('pluginspecificheader', 'extintmaxx'));
 
-        $mform->addElement('text', 'apitoken', get_string('apitoken', 'extintmaxx'));
-        $mform->setType('apitoken', PARAM_TEXT);
-        $mform->addHelpButton('apitoken', 'apitoken_help', 'extintmaxx');
+        $mform->addElement('text', 'provider_username', get_string('provider_username', 'extintmaxx'));
+        $mform->setType('provider_username', PARAM_TEXT);
+        $mform->addHelpButton('provider_username', 'provider_username_help', 'extintmaxx');
 
-        $mform->addElement('select', 'providers', get_string('providers_selection', 'extintmaxx'), array('NALI'));
-        $mform->addHelpButton('providers', 'providers_selection_help', 'extintmaxx');
+        $mform->addElement('text', 'provider_password', get_string('provider_password', 'extintmaxx'));
+        $mform->setType('provider_password', PARAM_TEXT);
+        $mform->addHelpButton('provider_password', 'provider_password_help', 'extintmaxx');
+
+        $mform->addElement('select', 'provider', get_string('providers_selection', 'extintmaxx'), array('ACCI'));
+        $mform->addHelpButton('provider', 'providers_selection_help', 'extintmaxx');
 
         $this->add_action_buttons();
 

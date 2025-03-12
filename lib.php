@@ -3,6 +3,8 @@
 use core_tag\reportbuilder\local\entities\instance;
 
 function extintmaxx_add_instance($instancedata, $mform = null) {
+
+
     global $DB;
 
     $instancedata->timecreated = time();

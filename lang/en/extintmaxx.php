@@ -25,10 +25,28 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+
+// Basic Strings:
 $string['pluginname'] = 'Maxx External Integration';
 $string['modulename'] = 'Maxx External Integration';
 $string['pluginspecificheader'] = 'Maxx External Integration Settings';
-$string['apitoken'] = 'API Token';
-$string['apitoken_help'] = 'Enter the API Token for the External Provider you would like to integrate with.';
+$string['manage'] = 'Manage';
+$string['extintmaxx_settings'] = 'Maxx External Integration Settings';
+
+
+
+// Form Strings:
+$string['apikey'] = 'API Key';
+$string['apikey_help'] = 'Enter the API Token for the External Provider you would like to integrate with.';
 $string['providers_selection'] = 'Providers';
 $string['providers_selection_help'] = 'Select the Provider you would like to integrate with.';
+$string['provider_username'] = 'Provider Username';
+$string['provider_username_help'] = 'Enter the Username for the selected provider you would like to integrate with.';
+$string['provider_password'] = 'Provider Password';
+$string['provider_password_help'] = 'Enter the Password for the selected provider you would like to integrate with.';
+$string['insertprovidercredentials'] = 'Insert Provider Credentials';
+
+
+// Providers:
+$string['nali'] = 'North American Learning Institute';
+$string['acci'] = 'ACCI Lifeskills';
