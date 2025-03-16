@@ -6,6 +6,8 @@ require_once("{$CFG->libdir}/filelib.php");
 defined('MOODLE_INTERNAL') || die();
 
 use curl;
+use mod_lti\local\ltiservice\response;
+
 /**
  * ACCI:
  * - Authenticates to API
@@ -59,8 +61,10 @@ class acci {
         $response = $curl->post($url, $data, $options);
 
         if ($response === false) {
+            echo "Admin Login Error: ";
             $error = $curl->error;
             echo $error;
+            return;
         }
 
         return $response;
@@ -91,7 +95,9 @@ class acci {
             echo $error;
         }
 
-        return $response;
+        $response_data = json_decode($response, true);
+
+        return $response_data;
     }
 
     function get_all_courses($token, $referaltype_id) {
@@ -121,7 +127,9 @@ class acci {
             echo $error;
         }
 
-        return $response;
+        $response_data = json_decode($response, true);
+
+        return $response_data;
     }
 
     function get_token($token_type, $studentid = null) {

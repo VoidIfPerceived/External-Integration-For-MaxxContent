@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/extintmaxx/db" VERSION="20250311" COMMENT="XMLDB file for Moodle mod/extintmaxx"
+<XMLDB PATH="mod/extintmaxx/db" VERSION="20250315" COMMENT="XMLDB file for Moodle mod/extintmaxx"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="extintmaxx_module" COMMENT="Table containing the module data for instances of the External Integration for Maxx plugin.">
+    <TABLE NAME="extintmaxx" COMMENT="Table containing the module data for instances of the External Integration for Maxx plugin.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="course the activity is attached to."/>
@@ -30,10 +30,12 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="provider" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Provider for the listed credentials"/>
-        <FIELD NAME="provider_username" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="Username/email field for the selected provider's API access"/>
-        <FIELD NAME="provider_password" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="Password field for the selected provider's API access."/>
+        <FIELD NAME="providerusername" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="Username/email field for the selected provider's API access"/>
+        <FIELD NAME="providerpassword" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="Password field for the selected provider's API access."/>
         <FIELD NAME="apikey" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="API key provided as credentials for provider's API access"/>
         <FIELD NAME="apitoken" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" COMMENT="API access token returned by provider after initialization."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Shows the creation date of entry (for debugging and logging purposes)."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this entry was last modified (for debugging and logging purposes)."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

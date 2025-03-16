@@ -38,12 +38,12 @@ $string['extintmaxx_settings'] = 'Maxx External Integration Settings';
 // Form Strings:
 $string['apikey'] = 'API Key';
 $string['apikey_help'] = 'Enter the API Token for the External Provider you would like to integrate with.';
-$string['providers_selection'] = 'Providers';
-$string['providers_selection_help'] = 'Select the Provider you would like to integrate with.';
-$string['provider_username'] = 'Provider Username';
-$string['provider_username_help'] = 'Enter the Username for the selected provider you would like to integrate with.';
-$string['provider_password'] = 'Provider Password';
-$string['provider_password_help'] = 'Enter the Password for the selected provider you would like to integrate with.';
+$string['providersselection'] = 'Providers';
+$string['providersselection_help'] = 'Select the Provider you would like to integrate with.';
+$string['providerusername'] = 'Provider Username';
+$string['providerusername_help'] = 'Enter the Username for the selected provider you would like to integrate with.';
+$string['providerpassword'] = 'Provider Password';
+$string['providerpassword_help'] = 'Enter the Password for the selected provider you would like to integrate with.';
 $string['insertprovidercredentials'] = 'Insert Provider Credentials';
 
 
