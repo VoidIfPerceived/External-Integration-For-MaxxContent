@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/extintmaxx/db" VERSION="20250326" COMMENT="XMLDB file for Moodle mod/extintmaxx"
+<XMLDB PATH="mod/extintmaxx/db" VERSION="20250329" COMMENT="XMLDB file for Moodle mod/extintmaxx"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -18,10 +18,13 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="extintmaxx_provider" COMMENT="Table containing the provider information for the External Integration for Maxx Plugin.">
+    <TABLE NAME="extintmaxx_user" COMMENT="Table containing the user information for OAuth connection using the External Integration for MaxxContent Plugin.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="provider" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The provider of external courses to be used within Moodle."/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The provider to which the user is attempting to log in using the External Integration for MaxxContent plugin."/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle's user id of the student whose access credentials are stored, used for reference between Moodle's user table and Extintmaxx's user table."/>
+        <FIELD NAME="redirecturl" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The redirect_url for the user attempting to access courses using the External Integration for MaxxContent plugin."/>
+        <FIELD NAME="provideruserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The id of the user within the provider's data structure."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

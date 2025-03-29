@@ -26,7 +26,7 @@ function provider_exists ($module, $provider) {
             'missingproviderinfo',
             "\$DB->get_record('extintmaxx_admin', array('provider' => $module->provider), '*')"
         );
-        echo "No information found for ".$module->provider."<br>";
+        echo "No information found for $module->provider, please contact your teacher.<br>";
     } else {
         return true;
     }

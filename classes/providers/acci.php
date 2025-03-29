@@ -379,9 +379,9 @@ class acci {
         return $responsedata;
     }
     /** Logs in a student to ACCI via API
+     *  @param string $token **REQUIRED** admintoken
      *  @param string $studentemail **REQUIRED** student email
      *  @param string $studentpassword **REQUIRED** student password
-     *  @param string $token **REQUIRED** admintoken
      *  @return object $responsedata API Response in object format
      */
     function student_auth($studentemail, $studentpassword, $token) {
@@ -395,10 +395,10 @@ class acci {
 
         $header = array(
             'accept: application/json',
-            'X-CSRF-TOKEN: '.$token
         );
 
         $data = array(
+            'token' => $token,
             'email' => $studentemail,
             'password' => $studentpassword
         );

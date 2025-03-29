@@ -29,7 +29,7 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
     function definition() {
         $provideroptions = array(
             'acci' => get_string('acci', 'extintmaxx'),
-            'nali' => get_string('nali', 'extintmaxx')
+            // 'nali' => get_string('nali', 'extintmaxx')
         );
         global $CFG, $DB;
         $mform = $this->_form;

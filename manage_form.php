@@ -23,7 +23,7 @@ class mod_extintmaxx_manage_form extends moodleform {
 
         $provideroptions = array(
             'acci' => get_string('acci', 'extintmaxx'),
-            'nali' => get_string('nali', 'extintmaxx')
+            // 'nali' => get_string('nali', 'extintmaxx')
         );
         $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
         $mform->addHelpButton('provider', 'providersselection', 'extintmaxx');
@@ -42,10 +42,6 @@ class mod_extintmaxx_manage_form extends moodleform {
         );
         
         // $mform->addElement('submit', 'mod_extintmaxx_manage_form', get_string('insertprovidercredentials', 'extintmaxx'));
-    }
-
-    function process_manage_form($formdata, $mform = null) {
-        $formdata;
     }
 }
 
