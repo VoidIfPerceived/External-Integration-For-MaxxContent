@@ -3,10 +3,16 @@
 use core_tag\reportbuilder\local\entities\instance;
 
 function extintmaxx_add_instance($instancedata, $mform = null) {
-
-
     global $DB;
 
+    $provider = $DB->get_record('extintmaxx_admin', ['provider' => $instancedata->provider], '*', MUST_EXIST);
+    if (!$provider) {
+        
+        return false;
+    }
+
+
+    $instancedata->name = 'View '.get_string($instancedata->provider, 'extintmaxx').' Courses';
     $instancedata->timecreated = time();
     $instancedata->timemodified = time();
     $instancedata->introformat = FORMAT_HTML;

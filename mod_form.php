@@ -27,6 +27,10 @@ require_once($CFG->dirroot.'/mod/extintmaxx/lib.php');
 
 class mod_extintmaxx_mod_form extends \moodleform_mod {
     function definition() {
+        $provideroptions = array(
+            'acci' => get_string('acci', 'extintmaxx'),
+            'nali' => get_string('nali', 'extintmaxx')
+        );
         global $CFG, $DB;
         $mform = $this->_form;
 
@@ -34,20 +38,20 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
 
         $mform->addElement('header', 'pluginspecificheader', get_string('pluginspecificheader', 'extintmaxx'));
 
-        $mform->addElement('text', 'providerusername', get_string('providerusername', 'extintmaxx'));
-        $mform->setType('providerusername', PARAM_TEXT);
-        $mform->addHelpButton('providerusername', 'providerusername_help', 'extintmaxx');
-
-        $mform->addElement('text', 'providerpassword', get_string('providerpassword', 'extintmaxx'));
-        $mform->setType('providerpassword', PARAM_TEXT);
-        $mform->addHelpButton('providerpassword', 'providerpassword_help', 'extintmaxx');
-
-        $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), array('ACCI'));
+        $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
         $mform->addHelpButton('provider', 'providersselection_help', 'extintmaxx');
 
         $this->add_action_buttons();
 
     }
+    
+    /**
+     *  Get all courses for the selected provider.
+     *  Get the name of the courses and the course description.
+     *  @return array $courses
+     */
+    function get_all_provider_courses($provider) {
+        global $DB;
 
-
+    }
 }
