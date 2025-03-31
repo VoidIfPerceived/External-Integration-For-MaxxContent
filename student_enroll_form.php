@@ -40,7 +40,8 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         $mform->setType('casenumber', PARAM_TEXT);
         $mform->addHelpButton('casenumber', 'studentcasenumber', 'extintmaxx');
 
-        $mform->addElement('button', 'existinguserenroll', get_string('existinguserenroll', 'extintmaxx'), array('onclick' => "document.location.href=\"$CFG->wwwroot/login/index.php\""));
+        $mform->addElement('hidden', 'cmid', $this->_customdata['cmid']);
+        $mform->setType('cmid', PARAM_INT);
 
         // Add a submit button
         $this->add_action_buttons(false, get_string('newuserenroll', 'extintmaxx'));
@@ -116,51 +117,39 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
     /**
      * Handles the form submission
      */
-    function handling($mform) {
-        echo "goobersnaps";
+    function handling($formdata) {
         global $USER;
-        if($mform->is_cancelled()) {
+        $newuser = new stdClass();
+        $studentemail = $formdata->email;
+        $studentpassword = $formdata->password;
+        $studentpasswordconfirmation = $formdata->passwordconfirmation;
+        $studentcasenumber = $formdata->casenumber;
+        $module = $this->_customdata['module'];
+        $provider = $this->_customdata['provider'];
+        $studentexists = student_exists($module);
+    
+        if (!$studentexists) {
+            // If student does not exist, create a new user
+            $newuser->userid = $USER->id;
+    
+            $newuser->email = $studentemail;
+            $newuser->password = $studentpassword;
+            $newuser->passwordconfirmation = $studentpasswordconfirmation;
+            $newuser->casenumber = $studentcasenumber;
+            $newuser->firstname = $USER->firstname;
+            $newuser->lastname = $USER->lastname;
 
-        }
-        else if ($formdata = $mform->get_data()) {
-            $newuser = new stdClass();
-            $studentemail = $formdata->email;
-            $studentpassword = $formdata->password;
-            $studentpasswordconfirmation = $formdata->passwordconfirmation;
-            $studentcasenumber = $formdata->casenumber;
-            $module = $this->_customdata['module'];
-            $provider = $this->_customdata['provider'];
-            $studentexists = student_exists($module);
-        
-            if (!$studentexists) {
-                // If student does not exist, create a new user
-                $newuser->userid = $USER->id;
-        
-                $newuser->email = $studentemail;
-                $newuser->password = $studentpassword;
-                $newuser->passwordconfirmation = $studentpasswordconfirmation;
-                $newuser->casenumber = $studentcasenumber;
-                $newuser->firstname = $USER->firstname;
-                $newuser->lastname = $USER->lastname;
 
-        
-                $enrollstudent = $mform->enroll_student($newuser, $provider, $module);
-                // Call the function to enroll the student
-                return $enrollstudent;
-            } else {
-                // If student exists, show an error message
-                throw new Exception('A student with this id is already in the plugin\'s database, please login or contact an administrator for assistance.');
-            }
-            if ($formdata->email !== $USER->email) {
-                throw new Exception('Email does not match the logged in user.');
-            };
-        
-            
-            // Handle the form data here
-            // For example, you can save it to the database or perform other actions
-            // $DB->insert_record('your_table', $formdata);
+            $enrollstudent = $this->enroll_student($newuser, $provider, $module);
+            // Call the function to enroll the student
+            // redirect(new moodle_url('/mod/extintmaxx/view.php', array('id' => $formdata->cmid)));
+            return $enrollstudent;
         } else {
-            // Display the form again if no data is submitted
+            // If student exists, show an error message
+            throw new Exception('A student with this id is already in the plugin\'s database, please login or contact an administrator for assistance.');
         }
+        if ($formdata->email !== $USER->email) {
+            throw new Exception('Email does not match the logged in user.');
+        };
     }
 }

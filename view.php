@@ -53,18 +53,24 @@ function student_exists ($module) {
 /**
  * @return object $enrollform
  */
-function student_login($module, $provider) {
-    $customdata = array(
-        'module' => $module,
-        'provider' => $provider
-    );
-    $enrollform = new mod_extintmaxx_student_enroll_form(null, $customdata);
+function student_login($module, $provider, $cmid, $cm) {
     $currentstudent = student_exists($module);
     if ($currentstudent) {
         return $currentstudent->redirecturl;
-    } else {
-        $enrollform->display();
     }
+    $customdata = array(
+        'module' => $module,
+        'provider' => $provider,
+        'cmid' => $cmid
+    );
+    $actionurl = new moodle_url('/mod/extintmaxx/view.php', array('id' => $cmid));
+    $enrollform = new mod_extintmaxx_student_enroll_form($actionurl, $customdata);
+    if ($enrollform->is_cancelled()) {
+        redirect(new moodle_url('/mod/extintmaxx/view.php', ['id' => $cmid]));
+    } else if ($formdata = $enrollform->get_data()) {
+        $enrollform->handling($formdata);
+        $cmid = $formdata->cmid;
+    } else { $enrollform->display(); }
 }
 
 function student_view($module, $provider, $redirecturl) {
@@ -86,10 +92,10 @@ echo $OUTPUT->heading(get_string('pluginname', 'extintmaxx'));
 $studentexists = student_exists($module);
 
 if ($studentexists) {
-    $url = student_login($module, $provider);
+    $url = student_login($module, $provider, $cmid, $cm);
     student_view($module, $provider, $url);
 } else {
-    student_login($module, $provider);
+    student_login($module, $provider, $cmid, $cm);
 }
 
 echo $OUTPUT->footer();
