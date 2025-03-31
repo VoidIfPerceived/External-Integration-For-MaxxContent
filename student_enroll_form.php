@@ -1,7 +1,10 @@
 <?php
 
+global $CFG, $DB, $USER;
 require_once('../../config.php');
 require_once($CFG->libdir . '/formslib.php');
+
+use mod_extintmaxx\providers\acci;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -10,8 +13,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class mod_extintmaxx_student_enroll_form extends moodleform {
+    /**
+     * Form definition
+     */
     function definition() {
-        global $CFG, $DB, $USER;
+        global $CFG;
         $mform = $this->_form;
 
         // Add a text field for the email
@@ -24,27 +30,131 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         $mform->setType('password', PARAM_TEXT);
         $mform->addHelpButton('password', 'studentpassword', 'extintmaxx');
 
+        // Password Confirmation Field
+        $mform->addElement('passwordunmask', 'passwordconfirmation', get_string('studentpasswordconfirmation', 'extintmaxx'));
+        $mform->setType('passwordconfirmation', PARAM_TEXT);
+        $mform->addHelpButton('passwordconfirmation', 'studentpasswordconfirmation', 'extintmaxx');
+
         // Add a text field for the case number
         $mform->addElement('text', 'casenumber', get_string('studentcasenumber', 'extintmaxx'));
         $mform->setType('casenumber', PARAM_TEXT);
         $mform->addHelpButton('casenumber', 'studentcasenumber', 'extintmaxx');
 
+        $mform->addElement('button', 'existinguserenroll', get_string('existinguserenroll', 'extintmaxx'), array('onclick' => "document.location.href=\"$CFG->wwwroot/login/index.php\""));
+
         // Add a submit button
-        $this->add_action_buttons(false, get_string('enroll', 'extintmaxx'));
+        $this->add_action_buttons(false, get_string('newuserenroll', 'extintmaxx'));
+
+        // $mform->setDefault('email',$this->_customdata['email']);
     }
 
-    function handling($mform) {
-        global $DB;
+    /**
+     * Form validation
+     */
+    function validation($data, $files) {
+        global $USER;
+        $errors = array();
 
+        // Validate the email field
+        if (empty($data['email'])) {
+            $errors['email'] = get_string('required');
+        } else if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = get_string('invalidemail', 'extintmaxx');
+        } else if ($data['email'] !== $USER->email) {
+            $errors['email'] = get_string('emailmismatch', 'extintmaxx');
+        }
+
+        // Validate the password field
+        if (empty($data['password'])) {
+            $errors['password'] = get_string('required');
+        }
+
+        // Validate the password confirmation field
+        if (empty($data['passwordconfirmation'])) {
+            $errors['passwordconfirmation'] = get_string('required');
+        } else if ($data['password'] !== $data['passwordconfirmation']) {
+            $errors['passwordconfirmation'] = get_string('passwordmismatch', 'extintmaxx');
+        }
+
+        return $errors;
+    }
+
+    /** 
+     * Asks current user to manually enroll themself under the module instance's selected course
+    */
+    function enroll_student($userdata, $provider, $module) {
+        global $DB;
+        $acci = new acci();
+        // Calling ACCI API to get necessary API information
+        $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
+        $admintoken = $adminlogin->data->token;
+        $adminid = $adminlogin->data->user->id;
+        $referraltypes = $acci->get_referral_types_by_admin($admintoken);
+        $referralid = $referraltypes->data[0]->referraltype->id;
+        $getallcourses = $acci->get_all_courses($admintoken, $referralid);
+        $courseid = $getallcourses->data[0]->course_id;
+        // Call ACCI API to enroll new student
+        $newuser = $acci->new_student_enrollment(
+            $admintoken,
+            $userdata->firstname,
+            $userdata->lastname,
+            $userdata->email,
+            $userdata->password,
+            $userdata->passwordconfirmation,
+            $adminid,
+            $referralid,
+            $courseid
+        );
+        // Insert the new user into the extintmaxx_user table
+            $userdata->provideruserid = $newuser->data->student->id;
+            $userdata->usertoken = $newuser->data->token;
+            $userdata->userremembertoken = $newuser->data->remembertoken;
+        $DB->insert_record('extintmaxx_user', $userdata);
+        return $newuser->data->redirectUrl;
+    }
+
+    /**
+     * Handles the form submission
+     */
+    function handling($mform) {
+        echo "goobersnaps";
+        global $USER;
         if($mform->is_cancelled()) {
 
         }
         else if ($formdata = $mform->get_data()) {
+            $newuser = new stdClass();
+            $studentemail = $formdata->email;
+            $studentpassword = $formdata->password;
+            $studentpasswordconfirmation = $formdata->passwordconfirmation;
+            $studentcasenumber = $formdata->casenumber;
+            $module = $this->_customdata['module'];
+            $provider = $this->_customdata['provider'];
+            $studentexists = student_exists($module);
+        
+            if (!$studentexists) {
+                // If student does not exist, create a new user
+                $newuser->userid = $USER->id;
+        
+                $newuser->email = $studentemail;
+                $newuser->password = $studentpassword;
+                $newuser->passwordconfirmation = $studentpasswordconfirmation;
+                $newuser->casenumber = $studentcasenumber;
+                $newuser->firstname = $USER->firstname;
+                $newuser->lastname = $USER->lastname;
 
+        
+                $enrollstudent = $mform->enroll_student($newuser, $provider, $module);
+                // Call the function to enroll the student
+                return $enrollstudent;
+            } else {
+                // If student exists, show an error message
+                throw new Exception('A student with this id is already in the plugin\'s database, please login or contact an administrator for assistance.');
+            }
             if ($formdata->email !== $USER->email) {
                 throw new Exception('Email does not match the logged in user.');
             };
-
+        
             
             // Handle the form data here
             // For example, you can save it to the database or perform other actions
@@ -53,15 +163,4 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
             // Display the form again if no data is submitted
         }
     }
-}
-
-if ($mform->is_cancelled()) {
-    
-} else if ($formdata = $mform->get_data()) {
-    $studentemail = $formdata->email;
-    $studentpassword = $formdata->password;
-
-    $DB->
-} else {
-    
 }

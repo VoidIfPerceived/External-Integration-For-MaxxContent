@@ -169,6 +169,15 @@ class acci {
      *  @param string $token **REQUIRED** admintoken
      *  @param string $referraltypeid **REQUIRED** referral type id
      *  @return object $responsedata API Response in object format
+     *  - @return bool status (status)
+     *  - @return string message (message)
+     *  - @return array data array (data) {
+     *      - @return object course object [data array index] {
+     *          - @return int referral type id (referraltype_id)
+     *          - @return int course id (course_id)
+     *          - @return string course type (course_type)
+     *          - @return string course guid (guid)
+     *          - @return array course info array (course)
      */
     function get_all_courses($token, $referraltypeid) {
         $curl = new curl();
@@ -192,21 +201,6 @@ class acci {
 
         $curl->setHeader($header);
 
-        /**
-         *  @var string $response **get_all_courses** CURL Response from API, returns the following data on success:
-         *  @param string $url Full Method URL
-         *  @param array $data Data sent to API
-         *  @param array $options CURL options
-         *  - @return bool status (status)
-         *  - @return string message (message)
-         *  - @return array data array (data) {
-         *      - @return object course object [data array index] {
-         *          - @return int referral type id (referraltype_id)
-         *          - @return int course id (course_id)
-         *          - @return string course type (course_type)
-         *          - @return string course guid (guid)
-         *          - @return array course info array (course)
-         */
         $response = $curl->post($url, $data, $options);
 
         if ($response == false) {
@@ -235,10 +229,22 @@ class acci {
         return $responsedata;
     }
     /** Gets students presently enrolled under an admin's course
-     *  @param string $token **REQUIRED** admintoken
+     *  @param string $admintoken **REQUIRED** admintoken
      *  @return object $responsedata API Response in object format
+     *  - @return bool status code (status)
+     *  - @return string message (message)
+     *  - @return array data array (data):
+     *      - @return int id (id)
+     *      - @return int superadmin id (superadmin_id)
+     *      - @return int referral type id (referraltype_id)
+     *      - @return array superadmin info array (superadmin)
+     *      - @return array referral type array (referraltype)
+     *          - @return int id (id)
+     *          - @return string referral type name (name)
+     *          - @return string referral type description (description)
+     *          - @return string referral type icon (icon)
      */
-    function get_students_by_admin($token) {
+    function get_students_by_admin($admintoken) {
         $curl = new curl();
         $getstudentsbyadminendpoint = "/api/getStudentsByAdmin";
 
@@ -252,31 +258,13 @@ class acci {
         );
 
         $data = array(
-            "token" => $token
+            "token" => $admintoken
         );
 
         $url = "{$this->accicoreurl}{$getstudentsbyadminendpoint}";
 
         $curl->setHeader($header);
 
-        /**
-         *  @var string $response **get_students_by_admin** CURL Response from API, Returns the following data on success:
-         *  @param string $url Full Method URL
-         *  @param array $data Data sent to API
-         *  @param array $options CURL options
-         *  - @return bool status code (status)
-         *  - @return string message (message)
-         *  - @return array data array (data):
-         *      - @return int id (id)
-         *      - @return int superadmin id (superadmin_id)
-         *      - @return int referral type id (referraltype_id)
-         *      - @return array superadmin info array (superadmin)
-         *      - @return array referral type array (referraltype)
-         *          - @return int id (id)
-         *          - @return string referral type name (name)
-         *          - @return string referral type description (description)
-         *          - @return string referral type icon (icon)
-         */
         $response = $curl->post($url, $data, $options);
 
         if ($response == false) {
@@ -291,6 +279,285 @@ class acci {
         $getreferraltypesstatus = $responsedata->status==true ? "Success" : "Error";
         $getreferraltypesmessage = $responsedata->message;
         $this->status_message($getreferraltypesstatus, $getreferraltypesmessage);
+
+        return $responsedata;
+    }
+
+    /**
+     *  Gets the course enrollment list for a specific student
+     *  @param string $admintoken **REQUIRED** admintoken
+     *  @param string $providerstudentid **REQUIRED** provider student id
+     *  @return object $responsedata API Response in object format
+    */
+    function get_enrollment_list_by_student_id($admintoken, $providerstudentid) {
+        $curl = new curl();
+        $getenrollmentlistbystudentid = "/api/getEnrollmentListByStudentId";
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true,
+        );
+
+        $header = array(
+            'accept: application/json'
+        );
+
+        $data = array(
+            "token" => $admintoken,
+            "student_id" => $providerstudentid
+        );
+
+        $url = "{$this->accicoreurl}{$getenrollmentlistbystudentid}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $getreferraltypesstatus = $responsedata->status==true ? "Success" : "Error";
+        $getreferraltypesmessage = $responsedata->message;
+        $this->status_message($getreferraltypesstatus, $getreferraltypesmessage);
+
+        return $responsedata;
+    }
+
+    /** Gets a list of US states which a new admin can be created under */
+    function get_state($admintoken) {
+        $curl = new curl();
+        $getstateendpoint = "/api/getState";
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true,
+        );
+
+        $header = array(
+            'accept: application/json'
+        );
+
+        $data = array(
+            "token" => $admintoken
+        );
+
+        $url = "{$this->accicoreurl}{$getstateendpoint}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $getreferraltypesstatus = $responsedata->status==true ? "Success" : "Error";
+        $getreferraltypesmessage = $responsedata->message;
+        $this->status_message($getreferraltypesstatus, $getreferraltypesmessage);
+
+        return $responsedata;
+    }
+
+    /** Gets all agencies within a given state within an admin registry*/
+    function get_agency_by_state_id($admintoken, $statecode) {
+        $curl = new curl();
+        $getagencybystateidendpoint = "/api/getAgencyByStateId";
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true,
+        );
+
+        $header = array(
+            'accept: application/json'
+        );
+
+        $data = array(
+            "token" => $admintoken,
+            "state_code" => $statecode
+        );
+
+        $url = "{$this->accicoreurl}{$getagencybystateidendpoint}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $getreferraltypesstatus = $responsedata->status==true ? "Success" : "Error";
+        $getreferraltypesmessage = $responsedata->message;
+        $this->status_message($getreferraltypesstatus, $getreferraltypesmessage);
+
+        return $responsedata;
+    }
+
+    /** Adds new admin under an agency 
+     * @param string $admintoken **REQUIRED** admintoken
+     * @param string $statecode **REQUIRED** state code
+     * @param string $agencyid **REQUIRED** agency id
+     * @param string $title **REQUIRED** title
+     * @param string $firstname **REQUIRED** firstname
+     * @param string $lastname **REQUIRED** lastname
+     * @param string $email **REQUIRED** email
+     * @param string $password **REQUIRED** password
+     * @param string $confirmpassword **REQUIRED** confirm password
+     * @param string $phone *Optional* phone
+     * @param string $address *Optional* address
+     * @param string $city *Optional* city
+     * @param string $zip *Optional* zip
+     * @param string $notes *Optional* notes
+     * @return object $responsedata API Response in object format
+    */
+    function add_admin($admintoken, $statecode, $agencyid, $title, $firstname, $lastname, $email, $password, $confirmpassword, $phone = null, $address = null, $city = null, $zip = null, $notes = null) {
+        $curl = new curl();
+        $addadminendpoint = "/api/addAdmin";
+
+        /** Optional param null checks (additional confirmation of value) */
+        $phone = $phone ? $phone : null;
+        $address = $address ? $address : null;
+        $city = $city > 0 ? $city : null;
+        $zip = $zip > 0 ? $zip : null;
+        $notes = $notes ? $notes : null;
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true
+        );
+
+        $header = array(
+            'accept: application/json',
+        );
+
+        $data = array(
+            'token' => $admintoken,
+            'state_code' => $statecode,
+            'agency_id' => $agencyid,
+            'title' => $title,
+            'first_name' => $firstname,
+            'last_name' => $lastname,
+            'email' => $email,
+            'password' => $password,
+            'confirm_password' => $confirmpassword,
+            'phone' => $phone,
+            'address' => $address,
+            'city' => $city,
+            'zip' => $zip,
+            'notes' => $notes
+        );
+
+        $url = "{$this->accicoreurl}{$addadminendpoint}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $addadminstatus = $responsedata->status==true ? "Success" : "Error";
+        $addadminmessage = $responsedata->message;
+        $this->status_message($addadminstatus, $addadminmessage);
+
+        return $responsedata;
+    }
+
+    /** Enrolls a new student under an agency with specific course access manually
+     * @param string $admintoken **REQUIRED** admintoken
+     * @param string $firstname **REQUIRED** Student firstname
+     * @param string $lastname **REQUIRED** Student lastname
+     * @param string $email **REQUIRED** Student email
+     * @param string $password **REQUIRED** Student password
+     * @param string $passwordconfirmation **REQUIRED** Student password confirmation
+     * @param string $adminid **REQUIRED** Admin id
+     * @param string $referraltypeid **REQUIRED** Referral type id
+     * @param string $courseid **REQUIRED** Course id
+     * @param string $phone *Optional* Student phone
+     * @param string $casenumber *Optional* Student case number
+     * @param string $coachname *Optional* Coach name
+     * @param string $coachemail *Optional* Coach email
+     * @param string $coachphone *Optional* Coach phone
+     * @return object $responsedata API Response in object format
+     */
+    function new_student_enrollment($admintoken, $firstname, $lastname, $email, $password, $passwordconfirmation, $adminid, $referraltypeid, $courseid, $phone = null, $casenumber = null, $coachname = null, $coachemail = null, $coachphone = null) {
+        $curl = new curl();
+        $newstudentenrollmentendpoint = "/api/newStudentEnrollment";
+
+        /** Optional param null checks (additional confirmation of value) */
+        $phone = $phone ? $phone : null;
+        $casenumber = $casenumber ? $casenumber : null;
+        $coachname = $coachname ? $coachname : null;
+        $coachemail = $coachemail ? $coachemail : null;
+        $coachphone = $coachphone > 0 ? $coachphone : null;
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true
+        );
+
+        $header = array(
+            'accept: application/json',
+        );
+
+        $data = array(
+            'token' => $admintoken,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $passwordconfirmation,
+            'admin_id' => $adminid,
+            'referraltype_id' => $referraltypeid,
+            'course_id' => $courseid,
+            'phone' => $phone,
+            'casenumber' => $casenumber,
+            'coachname' => $coachname,
+            'coachemail' => $coachemail,
+            'coachphone' => $coachphone 
+        );
+
+        $url = "{$this->accicoreurl}{$newstudentenrollmentendpoint}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $newstudentenrollmentstatus = $responsedata->status==true ? "Success" : "Error";
+        $newstudentenrollmentmessage = $responsedata->message;
+        $this->status_message($newstudentenrollmentstatus, $newstudentenrollmentmessage);
 
         return $responsedata;
     }
@@ -322,7 +589,6 @@ class acci {
      */
     function student_self_enrolled($remembertoken, $firstname, $lastname, $studentemail, $courseguid, $casenumber, $coachname = null, $coachemail = null, $coachphone = null) {
         $curl = new curl();
-        /** @var string $studentselfenrolledendpoint URL endpoint of student_self_enrolled method */
         $studentselfenrolledendpoint = "/api/studentSelfEnrolled";
 
         /** Optional param null checks (additional confirmation of value) */
@@ -355,15 +621,6 @@ class acci {
 
         $curl->setHeader($header);
 
-        /**
-         *  @var string $response CURL Response from API, Returns the following data on success:
-         *  @param string $url Full Method URL
-         *  @param array $data Data sent to API
-         *  @param array $options CURL options
-         *  - @return bool status code (status)
-         *  - @return string message (message)
-         *  - @return array data array (data):
-         */
         $response = $curl->post($url, $data, $options);
 
         if ($response == false) {
@@ -379,10 +636,9 @@ class acci {
         $studentselfenrolledmessage = $responsedata->message;
         $this->status_message($studentselfenrolledstatus, $studentselfenrolledmessage);
 
-        
-
         return $responsedata;
     }
+
     /** Logs in a student to ACCI via API
      *  @param string $token **REQUIRED** admintoken
      *  @param string $studentemail **REQUIRED** student email

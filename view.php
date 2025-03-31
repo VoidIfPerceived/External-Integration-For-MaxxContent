@@ -1,9 +1,12 @@
 <?php
 
+use core\analytics\analyser\student_enrolments;
 use core_reportbuilder\external\columns\sort\get;
 use mod_extintmaxx\providers\acci;
 
 require_once('../../config.php');
+require('./student_login_form.php');
+require('../extintmaxx/student_enroll_form.php');
 //Instance View Page
 
 /**
@@ -32,65 +35,61 @@ function provider_exists ($module, $provider) {
     }
 }
 
-/**
- * @return object $studentselfenrolled Student Self Enrolled Object from student_self_enrolled() function"
- */
-function student_login($module, $provider) {
+function student_exists ($module) {
     global $DB, $USER;
-    $currentuser = new stdClass();
-
-    $acci = new acci();
-    
-    $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
-    echo "<br>";
-    // Parse Admin Token
-    $admintoken = $adminlogin->data->token;
-    $remembertoken = $adminlogin->data->user->remember_token;
-    $referraltypes = $acci->get_referral_types_by_admin($admintoken);
-    $referralid = $referraltypes->data[0]->referraltype->id;
-    echo "<br>";
-
-    $getallcourses = $acci->get_all_courses($admintoken, $referralid);
-
-    echo $guid = $getallcourses->data[0]->guid;
-
-    $getstudentsbyadmin = $acci->get_students_by_admin($admintoken);
-
-    $currentuser->firstname = "Test";
-    $currentuser->lastname = "Student";
-    $currentuser->email = "test1@student.mdl";
-    $currentuser->casenumber = "111";
-    $studentselfenrolled = $acci->student_self_enrolled($remembertoken, $currentuser->firstname, $currentuser->lastname, $currentuser->email, $guid, $currentuser->casenumber);
-
-    echo "Student Self Enrolled: ".json_encode($studentselfenrolled)."<br>";
-
-    return $studentselfenrolled;
+    // Get data of current user from extintmaxx_user table
+    $currentuser = $DB->get_record(
+        'extintmaxx_user',
+        [
+            'userid' => $USER->id,
+            'provider' => $module->provider
+        ],
+        '*'
+    );
+    // Check $currentuser has data, if yes, return it, if no return false
+    return $currentuser ? $currentuser : false;
 }
 
-function student_view($module, $provider) {
-    $acci = new acci();
-    $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
-    
-    $studentlogin = student_login($module, $provider);
+/**
+ * @return object $enrollform
+ */
+function student_login($module, $provider) {
+    $customdata = array(
+        'module' => $module,
+        'provider' => $provider
+    );
+    $enrollform = new mod_extintmaxx_student_enroll_form(null, $customdata);
+    $currentstudent = student_exists($module);
+    if ($currentstudent) {
+        return $currentstudent->redirecturl;
+    } else {
+        $enrollform->display();
+    }
+}
 
-    $redirecturl = $studentlogin->data->redirectUrl;
-
+function student_view($module, $provider, $redirecturl) {
     $viewurl = "<iframe style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>";
     return $viewurl;
 }
 
-require_login($course, true, $cm);
+// require_login($course, true, $cm);
 $PAGE->set_url('/mod/extintmaxx/view.php', array('id' => $cm->id));
 $PAGE->set_title('External Integration for Maxx Content');
 $PAGE->set_heading('pluginname', 'extintmaxx');
-$PAGE->set_pagelayout('embedded');
+$PAGE->set_pagelayout('standard');
 
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'extintmaxx'));
 // echo '<iframe style="position: relative; top: 0; right: 0; bottom: 0; left: 0" src="https://developer.lifeskillslink.com/api/documentation#/Admin%20Referral%20Type%20Detail/getAllCourses" width="1200px" height="1000px"></iframe><br>';
 
-provider_exists($module, $provider);
-echo student_view($module, $provider);
+$studentexists = student_exists($module);
+
+if ($studentexists) {
+    $url = student_login($module, $provider);
+    student_view($module, $provider, $url);
+} else {
+    student_login($module, $provider);
+}
 
 echo $OUTPUT->footer();

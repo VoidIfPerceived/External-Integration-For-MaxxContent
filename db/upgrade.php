@@ -61,5 +61,24 @@ function xmldb_extintmaxx_upgrade($oldversion): bool {
         upgrade_mod_savepoint(true, 2025032902, 'extintmaxx');
         }
 
+    if ($oldversion < 2025032903) {
+
+        // Define table extintmaxx to be created.
+        $table = new xmldb_table('extintmaxx');
+
+        // Adding fields to table extintmaxx.
+        $table->add_field('referraltypeid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, );
+        $table->add_field('referraltypeid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, );
+
+
+        // Conditionally launch create table for extintmaxx_provider.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Extintmaxx savepoint reached.
+        upgrade_mod_savepoint(true, 2025032903, 'extintmaxx');
+    }
+
     return true;
 };
