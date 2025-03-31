@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
     $string['extintmaxx_settings'] = 'Maxx External Integration Settings';
 
 // Form Strings:
+/** Admin Forms */
     $string['apikey'] = 'API Key';
     $string['apikey_help'] = 'Enter the API Token for the External Provider you would like to integrate with.';
     $string['providersselection'] = 'Providers';
@@ -42,6 +43,21 @@ defined('MOODLE_INTERNAL') || die();
     $string['providerpassword'] = 'Provider Password';
     $string['providerpassword_help'] = 'Enter the Password for the selected provider you would like to integrate with.';
     $string['insertprovidercredentials'] = 'Insert Provider Credentials';
+/** Student Forms */
+    $string['studentusername'] = 'Username';
+    $string['studentusername_help'] = 'Enter your username for ${provider}.';
+    $string['studentpassword'] = 'Password';
+    $string['studentpassword_help'] = 'Enter your password for ${provider}.';
+    $string['studentemail'] = 'Email';
+    $string['studentemail_help'] = 'Enter your email for ${provider}.';
+    $string['studentfirstname'] = 'First Name';
+    $string['studentfirstname_help'] = 'Enter your first name for ${provider}.';
+    $string['studentlastname'] = 'Last Name';
+    $string['studentlastname_help'] = 'Enter your last name for ${provider}.';
+    $string['studentcasenumber'] = 'Case Number';
+    $string['studentcasenumber_help'] = 'Enter your case number.';
+    $string['enroll'] = 'Create Account';
+    $string['login'] = 'Login';
 
 // Providers:
     $string['nali'] = 'North American Learning Institute';

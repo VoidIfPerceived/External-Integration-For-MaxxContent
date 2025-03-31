@@ -32,29 +32,51 @@ function provider_exists ($module, $provider) {
     }
 }
 
+/**
+ * @return object $studentselfenrolled Student Self Enrolled Object from student_self_enrolled() function"
+ */
 function student_login($module, $provider) {
+    global $DB, $USER;
+    $currentuser = new stdClass();
+
     $acci = new acci();
     
     $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
     echo "<br>";
     // Parse Admin Token
     $admintoken = $adminlogin->data->token;
-    echo "Admin Token: $admintoken <br>";
-    echo "<br>";
+    $remembertoken = $adminlogin->data->user->remember_token;
     $referraltypes = $acci->get_referral_types_by_admin($admintoken);
-    echo "<br>";
     $referralid = $referraltypes->data[0]->referraltype->id;
-    echo "Referral ID: $referralid <br>";
     echo "<br>";
 
     $getallcourses = $acci->get_all_courses($admintoken, $referralid);
 
+    echo $guid = $getallcourses->data[0]->guid;
+
     $getstudentsbyadmin = $acci->get_students_by_admin($admintoken);
-    echo "All Students: ".json_encode($getstudentsbyadmin)."<br>";
+
+    $currentuser->firstname = "Test";
+    $currentuser->lastname = "Student";
+    $currentuser->email = "test1@student.mdl";
+    $currentuser->casenumber = "111";
+    $studentselfenrolled = $acci->student_self_enrolled($remembertoken, $currentuser->firstname, $currentuser->lastname, $currentuser->email, $guid, $currentuser->casenumber);
+
+    echo "Student Self Enrolled: ".json_encode($studentselfenrolled)."<br>";
+
+    return $studentselfenrolled;
 }
 
-function student_view($module, $provider, $admintoken, $studenttoken) {
+function student_view($module, $provider) {
+    $acci = new acci();
+    $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
+    
+    $studentlogin = student_login($module, $provider);
 
+    $redirecturl = $studentlogin->data->redirectUrl;
+
+    $viewurl = "<iframe style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>";
+    return $viewurl;
 }
 
 require_login($course, true, $cm);
@@ -66,9 +88,9 @@ $PAGE->set_pagelayout('embedded');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'extintmaxx'));
-echo '<iframe style="position: relative; top: 0; right: 0; bottom: 0; left: 0" src="https://developer.lifeskillslink.com/api/documentation#/Admin%20Referral%20Type%20Detail/getAllCourses" width="100%" height="1000px"></iframe><br>';
+// echo '<iframe style="position: relative; top: 0; right: 0; bottom: 0; left: 0" src="https://developer.lifeskillslink.com/api/documentation#/Admin%20Referral%20Type%20Detail/getAllCourses" width="1200px" height="1000px"></iframe><br>';
 
 provider_exists($module, $provider);
-student_login($module, $provider);
+echo student_view($module, $provider);
 
 echo $OUTPUT->footer();

@@ -82,6 +82,8 @@ class acci {
          *      - @return string token (token)
          *      - @return string token expiration (expires_at)
          *      - @return array user info array (user)
+         *          - @return string remember token (remember_token)
+         *          - @return int superadmin id (superadmin_id)
          */
         $response = $curl->post($url, $data, $options);
 
@@ -197,8 +199,8 @@ class acci {
          *  @param array $options CURL options
          *  - @return bool status (status)
          *  - @return string message (message)
-         *  - @return array data array (data):
-         *      - @return object course object [data array index]
+         *  - @return array data array (data) {
+         *      - @return object course object [data array index] {
          *          - @return int referral type id (referraltype_id)
          *          - @return int course id (course_id)
          *          - @return string course type (course_type)
@@ -294,19 +296,31 @@ class acci {
     }
 
     /** Adds students inserted information to admin enrollment
-     *  @param string $token **REQUIRED** admintoken
+     *  @param string $remembertoken **REQUIRED** remembertoken
      *  @param string $firstname **REQUIRED** Student firstname
      *  @param string $lastname **REQUIRED** Student lastname
      *  @param string $studentemail **REQUIRED** Student email
-     *  @param string $token **REQUIRED** admintoken
      *  @param string $courseguid **REQUIRED** Course guid {get_all_courses()}
      *  @param string $casenumber **REQUIRED** Student casenumber
      *  @param string $coachname *Optional* Coach name
      *  @param string $coachemail *Optional* Coach email
      *  @param string $coachphone *Optional* Coach phone
      *  @return object $responsedata API Response in object format
+     *  - @return array data array (data):
+     *      - @return string student token (token)
+     *      - @return string student remember token (remember_token)
+     *      - @return string student token expiration (expires_at)
+     *      - @return string student auto login url (redirectUrl)
+     *      - @return string student mobile auto login url (mobileAppUrl) 
+     *      - @return array student info array (student)
+     *          - @return int id (id)
+     *          - @return string student firstname (firstname)
+     *          - @return string student lastname (lastname)
+     *          - @return string student email (email)
+     *          - @return array admin info array (adminusr)
+     *          - @return array superadmin info array (superadmin)
      */
-    function student_self_enrolled($token, $firstname, $lastname, $studentemail, $courseguid, $casenumber, $coachname = null, $coachemail = null, $coachphone = null) {
+    function student_self_enrolled($remembertoken, $firstname, $lastname, $studentemail, $courseguid, $casenumber, $coachname = null, $coachemail = null, $coachphone = null) {
         $curl = new curl();
         /** @var string $studentselfenrolledendpoint URL endpoint of student_self_enrolled method */
         $studentselfenrolledendpoint = "/api/studentSelfEnrolled";
@@ -317,8 +331,8 @@ class acci {
         $coachphone = $coachphone > 0 ? $coachphone : null;
 
         $options = array(
-            "CURLOPT_FOLLOWLOCATION = TRUE",
-            "CURLOPT_RETURNTRANSFER = TRUE"
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true
         );
 
         $header = array(
@@ -326,7 +340,7 @@ class acci {
         );
 
         $data = array(
-            'token' => $token,
+            'token' => $remembertoken,
             'course_guid' => $courseguid,
             'firstname' => $firstname,
             'lastname' => $lastname,
@@ -349,15 +363,6 @@ class acci {
          *  - @return bool status code (status)
          *  - @return string message (message)
          *  - @return array data array (data):
-         *      - @return string admintoken (token)
-         *      - @return string student auto login url (redirect_url)
-         *      - @return array student info array (student)
-         *          - @return int id (id)
-         *          - @return string student firstname (firstname)
-         *          - @return string student lastname (lastname)
-         *          - @return string student email (email)
-         *          - @return array admin info array (adminusr)
-         *          - @return array superadmin info array (superadmin)
          */
         $response = $curl->post($url, $data, $options);
 
@@ -389,8 +394,8 @@ class acci {
         $studentauthendpoint = "/api/studentLogin/";
 
         $options = array(
-            "CURLOPT_FOLLOWLOCATION = TRUE",
-            "CURLOPT_RETURNTRANSFER = TRUE"
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true
         );
 
         $header = array(
