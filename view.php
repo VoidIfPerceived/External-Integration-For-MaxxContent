@@ -93,7 +93,8 @@ $studentexists = student_exists($module);
 
 if ($studentexists) {
     $url = student_login($module, $provider, $cmid, $cm);
-    student_view($module, $provider, $url);
+    echo $url;
+    echo student_view($module, $provider, $url);
 } else {
     student_login($module, $provider, $cmid, $cm);
 }

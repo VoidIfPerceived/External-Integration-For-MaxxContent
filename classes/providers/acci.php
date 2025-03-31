@@ -503,7 +503,7 @@ class acci {
      * @param string $coachphone *Optional* Coach phone
      * @return object $responsedata API Response in object format
      */
-    function new_student_enrollment($admintoken, $firstname, $lastname, $email, $password, $passwordconfirmation, $adminid, $referraltypeid, $courseid, $phone = null, $casenumber = null, $coachname = null, $coachemail = null, $coachphone = null) {
+    function new_student_enrollment($admintoken, $firstname, $lastname, $email, $password, $passwordconfirmation, $adminid, $agencyid, $referraltypeid, $courseid, $phone = null, $casenumber = null, $coachname = null, $coachemail = null, $coachphone = null) {
         $curl = new curl();
         $newstudentenrollmentendpoint = "/api/newStudentEnrollment";
 
@@ -531,7 +531,8 @@ class acci {
             'password' => $password,
             'password_confirmation' => $passwordconfirmation,
             'admin_id' => $adminid,
-            'referraltype_id' => $referraltypeid,
+            'agency_id' => $agencyid,
+            'referral_types_id' => $referraltypeid,
             'course_id' => $courseid,
             'phone' => $phone,
             'casenumber' => $casenumber,
@@ -554,7 +555,7 @@ class acci {
         }
 
         $responsedata = json_decode($response);
-
+        print_object($responsedata);
         $newstudentenrollmentstatus = $responsedata->status==true ? "Success" : "Error";
         $newstudentenrollmentmessage = $responsedata->message;
         $this->status_message($newstudentenrollmentstatus, $newstudentenrollmentmessage);

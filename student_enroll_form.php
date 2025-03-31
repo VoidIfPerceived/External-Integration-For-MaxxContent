@@ -84,7 +84,7 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
      * Asks current user to manually enroll themself under the module instance's selected course
     */
     function enroll_student($userdata, $provider, $module) {
-        global $DB;
+        global $DB, $USER;
         $acci = new acci();
         // Calling ACCI API to get necessary API information
         $adminlogin = $acci->admin_login($provider->providerusername, $provider->providerpassword);
@@ -93,6 +93,9 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         $referraltypes = $acci->get_referral_types_by_admin($admintoken);
         $referralid = $referraltypes->data[0]->referraltype->id;
         $getallcourses = $acci->get_all_courses($admintoken, $referralid);
+        $getagencies = $acci->get_agency_by_state_id($admintoken, "GA");
+        print_object($getagencies);
+        $agencyid = $getagencies->data[0]->id;
         $courseid = $getallcourses->data[0]->course_id;
         // Call ACCI API to enroll new student
         $newuser = $acci->new_student_enrollment(
@@ -103,14 +106,19 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
             $userdata->password,
             $userdata->passwordconfirmation,
             $adminid,
+            $agencyid,
             $referralid,
             $courseid
         );
         // Insert the new user into the extintmaxx_user table
-            $userdata->provideruserid = $newuser->data->student->id;
-            $userdata->usertoken = $newuser->data->token;
-            $userdata->userremembertoken = $newuser->data->remembertoken;
-        $DB->insert_record('extintmaxx_user', $userdata);
+            $userrecord = new stdClass;
+            $userrecord->userid = $USER->id;
+            $userrecord->provideruserid = $newuser->data->student->id;
+            // $userrecord->usertoken = $newuser->data->token;
+            $userrecord->userremembertoken = $newuser->data->remember_token;
+            $userrecord->redirecturl = $newuser->data->redirectUrl;
+            $userrecord->provider = $module->provider;
+        $DB->insert_record('extintmaxx_user', $userrecord);
         return $newuser->data->redirectUrl;
     }
 
