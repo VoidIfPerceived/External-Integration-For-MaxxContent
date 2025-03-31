@@ -42,7 +42,7 @@ class acci {
     }
 
         function status_message($status, $message) {
-            echo "Status: $status<br>Message: $message<br>";
+            "Status: $status<br>Message: $message<br>";
         }
     /** Gets all courses available to an admin
      *  @param string $username **REQUIRED** admin username

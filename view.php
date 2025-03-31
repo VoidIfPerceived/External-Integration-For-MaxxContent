@@ -5,7 +5,6 @@ use core_reportbuilder\external\columns\sort\get;
 use mod_extintmaxx\providers\acci;
 
 require_once('../../config.php');
-require('./student_login_form.php');
 require('../extintmaxx/student_enroll_form.php');
 //Instance View Page
 
@@ -93,7 +92,6 @@ $studentexists = student_exists($module);
 
 if ($studentexists) {
     $url = student_login($module, $provider, $cmid, $cm);
-    echo $url;
     echo student_view($module, $provider, $url);
 } else {
     student_login($module, $provider, $cmid, $cm);

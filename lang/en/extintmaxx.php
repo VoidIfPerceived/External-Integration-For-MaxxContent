@@ -45,19 +45,20 @@ defined('MOODLE_INTERNAL') || die();
     $string['insertprovidercredentials'] = 'Insert Provider Credentials';
 /** Student Forms */
     $string['studentusername'] = 'Username';
-    $string['studentusername_help'] = 'Enter your username for ${provider}.';
+    $string['studentusername_help'] = 'Enter your username.';
     $string['studentpassword'] = 'Password';
-    $string['studentpassword_help'] = 'Enter your password for ${provider}.';
+    $string['studentpassword_help'] = 'Enter your password.';
     $string['studentemail'] = 'Email';
-    $string['studentemail_help'] = 'Enter your email for ${provider}.';
+    $string['studentemail_help'] = 'Enter your email.';
     $string['studentfirstname'] = 'First Name';
-    $string['studentfirstname_help'] = 'Enter your first name for ${provider}.';
+    $string['studentfirstname_help'] = 'Enter your first name.';
     $string['studentlastname'] = 'Last Name';
-    $string['studentlastname_help'] = 'Enter your last name for ${provider}.';
+    $string['studentlastname_help'] = 'Enter your last name.';
+    $string['studentpasswordconfirmation'] = 'Confirm your Password';
+    $string['studentpasswordconfirmation_help'] = 'Please re-enter your Password.';
     $string['studentcasenumber'] = 'Case Number';
     $string['studentcasenumber_help'] = 'Enter your case number.';
-    $string['enroll'] = 'Create Account';
-    $string['login'] = 'Login';
+    $string['newuserenroll'] = 'Enroll';
 
 // Providers:
     $string['nali'] = 'North American Learning Institute';
@@ -94,3 +95,7 @@ defined('MOODLE_INTERNAL') || die();
 /** Module Form Submitted Event */
     $string['eventmoduleformsubmitted'] = 'Module form submitted';
     $string['eventmoduleformsubmitteddesc'] = 'The module form was submitted by userid: "${userid}".';
+
+// Error Strings
+    $string['invalidcredentials'] = 'Provided user credentials are invalid, please check username and password.';
+    $string['required'] = 'Missing Required Fields';

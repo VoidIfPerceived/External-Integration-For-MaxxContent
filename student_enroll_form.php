@@ -60,9 +60,9 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         if (empty($data['email'])) {
             $errors['email'] = get_string('required');
         } else if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = get_string('invalidemail', 'extintmaxx');
+            $errors['email'] = get_string('invalidcredentials', 'extintmaxx');
         } else if ($data['email'] !== $USER->email) {
-            $errors['email'] = get_string('emailmismatch', 'extintmaxx');
+            $errors['email'] = get_string('invalidcredentials', 'extintmaxx');
         }
 
         // Validate the password field
@@ -74,7 +74,7 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         if (empty($data['passwordconfirmation'])) {
             $errors['passwordconfirmation'] = get_string('required');
         } else if ($data['password'] !== $data['passwordconfirmation']) {
-            $errors['passwordconfirmation'] = get_string('passwordmismatch', 'extintmaxx');
+            $errors['passwordconfirmation'] = get_string('invalidcredentials', 'extintmaxx');
         }
 
         return $errors;
@@ -94,7 +94,6 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
         $referralid = $referraltypes->data[0]->referraltype->id;
         $getallcourses = $acci->get_all_courses($admintoken, $referralid);
         $getagencies = $acci->get_agency_by_state_id($admintoken, "GA");
-        print_object($getagencies);
         $agencyid = $getagencies->data[0]->id;
         $courseid = $getallcourses->data[0]->course_id;
         // Call ACCI API to enroll new student
@@ -157,7 +156,7 @@ class mod_extintmaxx_student_enroll_form extends moodleform {
             throw new Exception('A student with this id is already in the plugin\'s database, please login or contact an administrator for assistance.');
         }
         if ($formdata->email !== $USER->email) {
-            throw new Exception('Email does not match the logged in user.');
+            throw new Exception(get_string('invalidcredentials', 'extintmaxx'));
         };
     }
 }
