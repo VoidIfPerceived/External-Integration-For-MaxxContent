@@ -55,21 +55,13 @@ function student_exists ($module) {
 function student_login($module, $provider, $cmid, $cm) {
     $currentstudent = student_exists($module);
     if ($currentstudent) {
-        return $currentstudent->redirecturl;
+        //If Current user has an entry within the database
+        //Return their student info
+        return;
+    } else {
+        //If Current user does not have an entry within the database
+        //Parse some new data and submit it to the api
     }
-    $customdata = array(
-        'module' => $module,
-        'provider' => $provider,
-        'cmid' => $cmid
-    );
-    $actionurl = new moodle_url('/mod/extintmaxx/view.php', array('id' => $cmid));
-    $enrollform = new mod_extintmaxx_student_enroll_form($actionurl, $customdata);
-    if ($enrollform->is_cancelled()) {
-        redirect(new moodle_url('/mod/extintmaxx/view.php', ['id' => $cmid]));
-    } else if ($formdata = $enrollform->get_data()) {
-        $enrollform->handling($formdata);
-        $cmid = $formdata->cmid;
-    } else { $enrollform->display(); }
 }
 
 function student_view($module, $provider, $redirecturl) {
