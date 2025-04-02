@@ -3,7 +3,6 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/formslib.php');
-use mod_extintmaxx\providers\acci;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -44,93 +43,3 @@ class mod_extintmaxx_manage_form extends moodleform {
         // $mform->addElement('submit', 'mod_extintmaxx_manage_form', get_string('insertprovidercredentials', 'extintmaxx'));
     }
 }
-
-admin_externalpage_setup('manageextintmaxx');
-
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('extintmaxx_settings', 'extintmaxx'));
-
-// $acci = new acci();
-$mform = new mod_extintmaxx_manage_form();
-
-if ($mform->is_cancelled()) {
-    
-} else if ($formdata = $mform->get_data()) {
-    $providerusername = $formdata->providerusername;
-    $providerpassword = $formdata->providerpassword;
-    $provider = $formdata->provider;
-    $apitoken = 0;
-    // $acci->admin_login($providerusername, $providerpassword);
-    // $apitoken = $acci->data->token;
-    $formdata->apitoken = $apitoken;
-
-    var_dump($providerusername, $providerpassword);
-
-    echo '<br>';
-
-    // var_dump($acci);
-
-    $providerexists = $DB->record_exists(
-        'extintmaxx_admin',
-        ['provider' => $provider]
-    );
-
-    if ($providerexists == true) {
-        $id = $DB->get_field(
-            'extintmaxx_admin',
-            'id',
-            ['provider' => $provider]
-        );
-
-        $formdata->id = $id;
-        $formdata->timemodified = time();
-
-        return $DB->update_record(
-            'extintmaxx_admin',
-            $formdata
-        );
-    } else {
-        $formdata->timecreated = time();
-        $formdata->timemodified = time();
-        $id = $DB->insert_record(
-            'extintmaxx_admin',
-            $formdata
-        );
-
-        echo $id;
-        return $id;
-    }
-
-} else {
-    $provider = 'acci';
-
-    $providerexists = $DB->record_exists(
-        'extintmaxx_admin',
-        ['provider' => $provider]
-    );
-
-    if ($providerexists == true) {
-        $record = $DB->get_record(
-            'extintmaxx_admin',
-            ['provider' => $provider]
-        );
-        $providerusername = $record->providerusername;
-        $providerpassword = $record->providerpassword;
-    } else {
-        $providerusername = '';
-        $providerpassword = '';
-    }
-    $toform = array(
-        'provider' => $provider,
-        'providerusername' => $providerusername,
-        'providerpassword' => $providerpassword
-    );
-
-
-
-    $mform->set_data($toform);
-    $mform->display();
-}
-
-echo $OUTPUT->footer();
-
