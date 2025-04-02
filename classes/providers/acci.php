@@ -96,7 +96,6 @@ class acci {
 
         $responsedata = json_decode($response);
 
-        echo "Raw Response Status Code: ".var_dump($response)."<br>";
         $adminstatus = $responsedata->status==true ? "Success" : "Error";
         $adminmessage = $responsedata->message;
         $this->status_message($adminstatus, $adminmessage);
@@ -125,8 +124,6 @@ class acci {
         );
 
         $url = "{$this->accicoreurl}{$referraltypesendpoint}";
-
-        echo "Referral URL: {$url}<br>";
 
         $curl->setHeader($header);
 
@@ -555,7 +552,6 @@ class acci {
         }
 
         $responsedata = json_decode($response);
-        print_object($responsedata);
         $newstudentenrollmentstatus = $responsedata->status==true ? "Success" : "Error";
         $newstudentenrollmentmessage = $responsedata->message;
         $this->status_message($newstudentenrollmentstatus, $newstudentenrollmentmessage);
