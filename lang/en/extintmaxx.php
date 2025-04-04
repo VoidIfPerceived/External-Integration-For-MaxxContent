@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die();
     $string['pluginspecificheader'] = 'Maxx External Integration Settings';
     $string['manage'] = 'Manage';
     $string['extintmaxx_settings'] = 'Maxx External Integration Settings';
+    $string['modulenameplural'] = 'Maxx External Integration';
 
 // Form Strings:
 /** Admin Forms */

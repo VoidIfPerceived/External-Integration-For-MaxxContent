@@ -41,6 +41,8 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
         $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
         $mform->addHelpButton('provider', 'providersselection_help', 'extintmaxx');
 
+        $mform->addElement('select', 'providercourse', get_string('providercourse', 'extintmaxx'), );
+
         $this->add_action_buttons();
 
     }
@@ -52,6 +54,6 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
      */
     function get_all_provider_courses($provider) {
         global $DB;
-
+        $provider;
     }
 }

@@ -5,7 +5,7 @@ use core_reportbuilder\external\columns\sort\get;
 use mod_extintmaxx\providers\acci;
 use mod_extintmaxx\providers\provider_api_method_chains;
 
-require_once('../../config.php');
+require_once(__DIR__ . '/../../config.php');
 //Instance View Page
 
 /**
@@ -25,21 +25,29 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 $module = $DB->get_record('extintmaxx', array('id' => $cm->instance), '*', MUST_EXIST);
 $provider = $DB->get_record('extintmaxx_admin', array('provider' => $module->provider), '*');
 
+$PAGE->set_context(context_system::instance());
+
 function student_view($redirecturl) {
-    $viewurl = "<iframe style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>";
-    return $viewurl;
+    if ($redirecturl == 'invalidlogin') {
+        $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
+        return $viewurl;
+    } else {
+        $viewurl = "<iframe style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>";
+        return $viewurl;
+    }
 }
 
-// require_login($course, true, $cm);
 $PAGE->set_url('/mod/extintmaxx/view.php', array('id' => $cm->id));
 $PAGE->set_title('External Integration for Maxx Content');
-$PAGE->set_heading('pluginname', 'extintmaxx');
-$PAGE->set_pagelayout('standard');
-
-$redirecturl = $methodchains->student_login($USER->id, $provider->provider)->redirecturl;
-echo student_view($redirecturl);
+$PAGE->set_pagelayout('incourse');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('pluginname', 'extintmaxx'));
+if (isguestuser() == true) {
+    $redirecturl = 'invalidlogin';
+} else {
+    $redirecturl = $methodchains->student_login($USER->id, $provider->provider)->redirecturl;
+}
+
+echo student_view($redirecturl);
 
 echo $OUTPUT->footer();

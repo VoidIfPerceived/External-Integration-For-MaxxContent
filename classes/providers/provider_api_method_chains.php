@@ -20,12 +20,26 @@ class provider_api_method_chains {
      *  @param string $provider The supplied provider the DB will be checked for.
      *  @return object $providerdata The DB response object with the provider information requested.
      */
-    function provider_record_exists($provider) {
+    function admin_record_exists($provider) {
         global $DB;
-        $providerrecord = $DB->get_record('extintmaxx_admin', array('provider' => $provider));
-        if (!$providerrecord->provider) {
+        $adminrecord = $DB->get_record('extintmaxx_admin', array('provider' => $provider));
+        if (!$adminrecord->provider) {
             return false;
-        } else if ($providerrecord->provider) {
+        } else if ($adminrecord->provider) {
+            return $adminrecord;
+        }
+    }
+    /** Checks whether a database entry for the specified course(s) for a provider exist within the plugin */
+    function provider_record_exists($provider, $course=null) {
+        global $DB;
+        if (!$course) {
+            $providerrecord = $DB->get_records('extintmaxx_provider', array('provider' => $provider));
+        } else {
+            $providerrecord = $DB->get_records('extintmaxx_provider', array('provider' => $provider, 'providercourseid' => $course));
+        }
+        if (!$providerrecord) {
+            return false;
+        } else if ($providerrecord) {
             return $providerrecord;
         }
     }
@@ -75,7 +89,7 @@ class provider_api_method_chains {
     /** ACCI Method Chains */
     /** 
      * @param object $adminlogin admin_login() method and params or object returned from admin_login()
-     * @param object $provider Provider object returned from provider_record_exists() method
+     * @param object $provider Provider object returned from admin_record_exists() method
      * @return object $newstudentrecord Copy of record data inserted into DB
     */
     function enroll_student($adminlogin, $provider) {
@@ -136,16 +150,60 @@ class provider_api_method_chains {
      */
     function student_login($userid, $provider) {
         $acci = new acci();
-        $providerrecord = $this->provider_record_exists($provider);
+        $adminrecord = $this->admin_record_exists($provider);
         $studentrecord = $this->student_record_exists($userid, $provider);
-        if ($providerrecord && !$studentrecord['student']) {
+        if ($adminrecord && !$studentrecord['student']) {
             //If user has an entry for this provider in the database
             //Return student info
-            return $this->enroll_student($acci->admin_login($providerrecord->providerusername, $providerrecord->providerpassword), $providerrecord);
-        } else if ($providerrecord && $studentrecord['student']) {
+            return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord);
+        } else if ($adminrecord && $studentrecord['student']) {
             return $studentrecord['student'];
             //If user does not have an entry for this provider in the database
             //Parse new data and submit to API 
+        }
+    }
+
+    function get_all_provider_referral_types($provider) {
+        $acci = new acci();
+        $adminrecord = $this->admin_record_exists($provider);
+        $adminlogin = $acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword);
+        $admintoken = $adminlogin->data->token;
+        
+        $referral = $acci->get_referral_types_by_admin($admintoken);
+        $referraltypes = array();
+
+        foreach ($referral->data as $index) {
+            $findreferralid = $index->referraltype_id;
+            array_push($referraltypes, $findreferralid);
+        }
+
+        return $referraltypes;
+    }
+
+    function update_provider_courses($provider) {
+        global $DB;
+        $acci = new acci();
+        $adminrecord = $this->admin_record_exists($provider);
+        $adminlogin = $acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword);
+        $referraltypes = $this->get_all_provider_referral_types($adminrecord->provider);
+        $admintoken = $adminlogin->data->token;
+        $courses = array();
+        foreach ($referraltypes as $referraltypeid) {
+            $getallcourses = $acci->get_all_courses($admintoken, $referraltypeid);
+            $course = [
+                'provider' => $adminrecord->provider,
+                'referraltypeid' => $referraltypeid,
+                'providercourseid' => $getallcourses->data[0]->course_id,
+                'courseguid' => $getallcourses->data[0]->guid,
+                'providercoursename' => $getallcourses->data[0]->title,
+                'providercoursedesc' => $getallcourses->data[0]->description
+            ];
+            $courseexists = $this->provider_record_exists($adminrecord->provider, $course['courseid']);
+            if ($courseexists) {
+                $DB->update_record('extintmaxx_provider', $course);
+            } else {
+                $DB->insert_record('extintmaxx_provider', $course);
+            }
         }
     }
 }
