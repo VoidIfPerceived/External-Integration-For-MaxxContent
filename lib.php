@@ -1,9 +1,11 @@
 <?php
 
 use core_tag\reportbuilder\local\entities\instance;
+use mod_extintmaxx\providers\provider_api_method_chains;
 
 function extintmaxx_add_instance($instancedata, $mform = null) {
     global $DB;
+    $methodchains = new provider_api_method_chains();
 
     $provider = $DB->get_record('extintmaxx_admin', ['provider' => $instancedata->provider], '*', MUST_EXIST);
     if (!$provider) {
@@ -11,14 +13,18 @@ function extintmaxx_add_instance($instancedata, $mform = null) {
         return false;
     }
 
+    $selectedcourse = $methodchains->provider_record_exists($instancedata->provider, $instancedata->providercourse);
+    foreach ($selectedcourse as $course) {
+        $instancedata->providercourseid = $course->providercourseid;
+        $instancedata->providercoursename = $course->providercoursename;
+    }
 
-    $instancedata->name = 'View '.get_string($instancedata->provider, 'extintmaxx').' Courses';
+    $instancedata->name = get_string($instancedata->provider, 'extintmaxx')." - ".$instancedata->providercoursename;
     $instancedata->timecreated = time();
     $instancedata->timemodified = time();
     $instancedata->introformat = FORMAT_HTML;
 
     $id = $DB->insert_record('extintmaxx', $instancedata);
-    var_dump($id);
 
     return $id;
 

@@ -25,6 +25,8 @@
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 require_once($CFG->dirroot.'/mod/extintmaxx/lib.php');
 
+use mod_extintmaxx\providers\provider_api_method_chains;
+
 class mod_extintmaxx_mod_form extends \moodleform_mod {
     function definition() {
         $provideroptions = array(
@@ -41,19 +43,32 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
         $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
         $mform->addHelpButton('provider', 'providersselection_help', 'extintmaxx');
 
-        $mform->addElement('select', 'providercourse', get_string('providercourse', 'extintmaxx'), );
+        $mform->addElement('select', 'providercourse', get_string('providercourse', 'extintmaxx'), $this->get_all_provider_courses('acci'));
 
         $this->add_action_buttons();
 
     }
-    
-    /**
+
+        /**
      *  Get all courses for the selected provider.
      *  Get the name of the courses and the course description.
      *  @return array $courses
      */
     function get_all_provider_courses($provider) {
         global $DB;
-        $provider;
+        $methodchains = new provider_api_method_chains();
+
+        $providercourses = $methodchains->provider_record_exists($provider);
+        if ($providercourses) {
+            $courses = array();
+            foreach ($providercourses as $course) {
+                $providercourseid = $course->providercourseid;
+                $providercoursename = $course->providercoursename;
+                $courses[$providercourseid] = $providercoursename;  
+            }
+            return $courses;
+        } else {
+            return false;
+        }
     }
 }

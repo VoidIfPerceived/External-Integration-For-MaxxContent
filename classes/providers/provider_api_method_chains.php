@@ -195,11 +195,17 @@ class provider_api_method_chains {
                 'referraltypeid' => $referraltypeid,
                 'providercourseid' => $getallcourses->data[0]->course_id,
                 'courseguid' => $getallcourses->data[0]->guid,
-                'providercoursename' => $getallcourses->data[0]->title,
-                'providercoursedesc' => $getallcourses->data[0]->description
+                'providercoursename' => $getallcourses->data[0]->course->title,
+                'providercoursedesc' => $getallcourses->data[0]->course->description
             ];
             $courseexists = $this->provider_record_exists($adminrecord->provider, $course['courseid']);
             if ($courseexists) {
+                $id = $DB->get_field(
+                    'extintmaxx_provider',
+                    'id',
+                    ['provider' => $provider, 'providercourseid' => $course['providercourseid']]
+                );
+                $course['id'] = $id;
                 $DB->update_record('extintmaxx_provider', $course);
             } else {
                 $DB->insert_record('extintmaxx_provider', $course);

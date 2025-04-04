@@ -4,12 +4,17 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require('./manage_form.php');
 
+use mod_extintmaxx\providers\provider_api_method_chains;
+use mod_extintmaxx\providers\acci;
+
 admin_externalpage_setup('manageextintmaxx');
 $actionurl = new moodle_url('/mod/extintmaxx/manage_settings.php');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('extintmaxx_settings', 'extintmaxx'));
 
+$methodchains = new provider_api_method_chains();
+$acci = new acci();
 $mform = new mod_extintmaxx_manage_form($actionurl);
 
 if ($mform->is_cancelled()) {
@@ -42,6 +47,9 @@ if ($mform->is_cancelled()) {
             'extintmaxx_admin',
             $formdata
         );
+
+        $methodchains->update_provider_courses($provider);
+
         $mform->display();
         $time = new DateTime("now", new DateTimeZone('UTC'));
         $time->format("F j, Y, g:i a T");
@@ -53,6 +61,8 @@ if ($mform->is_cancelled()) {
             'extintmaxx_admin',
             $formdata
         );
+
+        $methodchains->update_provider_courses($provider);
 
         $mform->display();
         $time = new DateTime("now", new DateTimeZone('America'));
@@ -83,8 +93,6 @@ if ($mform->is_cancelled()) {
         'providerusername' => $providerusername,
         'providerpassword' => $providerpassword
     );
-
-
 
     $mform->set_data($toform);
     $mform->display();

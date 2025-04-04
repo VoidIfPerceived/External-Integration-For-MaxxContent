@@ -636,6 +636,54 @@ class acci {
         return $responsedata;
     }
 
+    /**
+     *  Gets the student status for a specific course
+     *  @param string $admintoken **REQUIRED** admintoken
+     *  @param int $providerstudentid **REQUIRED** provider student id
+     *  @param int $providercourseid **REQUIRED** provider course id
+     *  @return object $responsedata API Response in object format
+    */
+    function check_student_status($admintoken, $providerstudentid, $providercourseid) {
+        $curl = new curl();
+        $checkstudentstatusendpoint = "/api/checkStudentStatus";
+
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true,
+        );
+
+        $header = array(
+            'accept: application/json'
+        );
+
+        $data = array(
+            "token" => $admintoken,
+            "student_id" => $providerstudentid,
+            "course_id" => $providercourseid
+        );
+
+        $url = "{$this->accicoreurl}{$checkstudentstatusendpoint}";
+
+        $curl->setHeader($header);
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $checkstudentstatusstatus = $responsedata->status==true ? "Success" : "Error";
+        $checkstudentstatusmessage = $responsedata->message;
+        $this->status_message($checkstudentstatusstatus, $checkstudentstatusmessage);
+
+        return $responsedata;
+    }
+
     /** Logs in a student to ACCI via API
      *  @param string $token **REQUIRED** admintoken
      *  @param string $studentemail **REQUIRED** student email

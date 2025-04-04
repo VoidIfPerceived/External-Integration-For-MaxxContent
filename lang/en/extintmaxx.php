@@ -44,6 +44,7 @@ defined('MOODLE_INTERNAL') || die();
     $string['providerpassword'] = 'Provider Password';
     $string['providerpassword_help'] = 'Enter the Password for the selected provider you would like to integrate with.';
     $string['insertprovidercredentials'] = 'Insert Provider Credentials';
+    $string['providercourse'] = 'Courses';
 /** Student Forms */
     $string['studentusername'] = 'Username';
     $string['studentusername_help'] = 'Enter your username.';
