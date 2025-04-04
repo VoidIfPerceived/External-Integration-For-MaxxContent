@@ -61,7 +61,7 @@ function xmldb_extintmaxx_upgrade($oldversion): bool {
         upgrade_mod_savepoint(true, 2025032902, 'extintmaxx');
         }
 
-    if ($oldversion < 2025032903) {
+    if ($oldversion < 2025040400) {
 
         // Define table extintmaxx to be created.
         $table = new xmldb_table('extintmaxx');
@@ -80,7 +80,7 @@ function xmldb_extintmaxx_upgrade($oldversion): bool {
         upgrade_mod_savepoint(true, 2025040400, 'extintmaxx');
     }
 
-    if ($oldversion < 2025032903) {
+    if ($oldversion < 2025040400) {
 
         // Define table extintmaxx to be created.
         $table = new xmldb_table('extintmaxx_provider');
