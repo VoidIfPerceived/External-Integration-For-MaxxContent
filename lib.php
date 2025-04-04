@@ -53,3 +53,61 @@ function extintmaxx_delete_instance($id): bool {
 
     return $DB->delete_records('extintmaxx', ['id' => $id]);
 }
+
+function extintmaxx_supports($feature) {
+    switch ($feature) {
+        case FEATURE_GRADE_HAS_GRADE: return true;
+
+        default: return null;
+    }
+}
+
+function extintmaxx_grade_item_update($instance, $grades=NULL) {
+    require_once($CFG->libdir . '/gradelib.php');
+
+    if (property_exists($instance, 'cmidnumber')) { // May not be always present.
+        $params = array('itemname' => $instance->name, 'idnumber' => $instance->cmidnumber);
+    } else {
+        $params = array('itemname' => $instance->name);
+    }
+
+    if ($quiz->grade > 0) {
+        $params['gradetype'] = GRADE_TYPE_VALUE;
+        $params['grademax']  = $instance->grade;
+        $params['grademin']  = 0;
+
+    } else {
+        $params['gradetype'] = GRADE_TYPE_NONE;
+    }
+}
+
+function extintmaxx_update_grades($instance, $userid = 0, $nullifnone = true) {
+    global $CFG, $DB;
+    require_once($CFG->libdir . '/gradelib.php');
+
+    if ($instance->grade == 0) {
+        extintmaxx_grade_item_update($quiz);
+
+    } else if ($grades = extintmaxx_get_user_grades($quiz, $userid)) {
+        extintmaxx_grade_item_update($quiz, $grades);
+
+    } else if ($userid && $nullifnone) {
+        $grade = new stdClass();
+        $grade->userid = $userid;
+        $grade->rawgrade = null;
+        extintmaxx_grade_item_update($quiz, $grade);
+
+    } else {
+        extintmaxx_grade_item_update($quiz);
+    }
+}
+
+function extintmaxx_get_user_grades($instance, $userid = 0) {
+    global $DB;
+
+    if ($userid) {
+        return $DB->get_record('extintmaxx_grades', ['userid' => $userid, 'extintmaxxid' => $instance->id]);
+    } else {
+        return $DB->get_records('extintmaxx_grades', ['extintmaxxid' => $instance->id]);
+    }
+}
