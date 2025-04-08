@@ -212,4 +212,39 @@ class provider_api_method_chains {
             }
         }
     }
+
+    /** 
+     * @param string $provider Provider of specified CourseID
+     * @param int $courseid Inserted Course ID
+     * @param array $users Array of user IDs to get course data for
+     * @return array $studentdata Array of student course data objects with keys of userids
+     */
+    function get_students_course_data($adminlogin, $provider, $courseid, $users) {
+        $acci = new acci();
+        $admintoken = $adminlogin->data->token;
+        global $DB;
+        $studentdata = array();
+
+        foreach ($users as $userid) {
+            $studentrecord = $this->student_record_exists($userid, $provider);
+            if ($studentrecord == true) {
+                $coursedata = $acci->check_student_status($admintoken, $userid, $courseid);
+                $student = new stdClass;
+                $student->userid = $userid;
+                $student->provider = $provider;
+                $student->providercourseid = $courseid;
+                $student->coursedata = $coursedata ? $coursedata : "Course data not found";
+                array_push($studentdata, $student);
+            } else {
+                $studentnotfound = new stdClass;
+                $studentnotfound->userid = $userid;
+                $studentnotfound->provider = $provider;
+                $studentnotfound->providercourseid = $courseid;
+                $studentnotfound->coursedata = "Student data not found";
+                array_push($studentdata, $studentnotfound);
+            }
+        }
+
+        return $studentdata;
+    }
 }

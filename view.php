@@ -50,4 +50,6 @@ if (isguestuser() == true) {
 
 echo student_view($redirecturl);
 
+$getcoursedatacheck = $methodchains->get_students_course_data($acci->admin_login($provider->providerusername, $provider->providerpassword), "acci", 242, [327247, 327510, 327511]);
+
 echo $OUTPUT->footer();

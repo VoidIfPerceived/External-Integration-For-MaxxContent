@@ -645,7 +645,7 @@ class acci {
     */
     function check_student_status($admintoken, $providerstudentid, $providercourseid) {
         $curl = new curl();
-        $checkstudentstatusendpoint = "/api/checkStudentStatus";
+        $checkstudentstatusendpoint = "/api/check-student-status";
 
         $options = array(
             "CURLOPT_FOLLOWLOCATION" => true,
