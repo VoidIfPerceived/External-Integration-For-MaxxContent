@@ -198,7 +198,7 @@ class provider_api_method_chains {
                 'providercoursename' => $getallcourses->data[0]->course->title,
                 'providercoursedesc' => $getallcourses->data[0]->course->description
             ];
-            $courseexists = $this->provider_record_exists($adminrecord->provider, $course['courseid']);
+            $courseexists = $this->provider_record_exists($adminrecord->provider, $course['providercourseid']);
             if ($courseexists) {
                 $id = $DB->get_field(
                     'extintmaxx_provider',
