@@ -123,7 +123,7 @@ class acci {
             "token" => $token
         );
 
-        $url = "https://developer.lifeskillslink.com{$referraltypesendpoint}";
+        $url = "{$this->accicoreurl}{$referraltypesendpoint}";
 
         $curl->setHeader($header);
 

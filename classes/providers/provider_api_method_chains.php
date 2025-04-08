@@ -139,7 +139,7 @@ class provider_api_method_chains {
             $USER->id
         );
 
-
+        print_object($enrolledstudent);
 
         $newstudentrecord = new stdClass;
         $newstudentrecord->provider = $provider->provider;
@@ -153,7 +153,7 @@ class provider_api_method_chains {
         // $newstudentrecord->studentremembertoken = $enrolledstudent->data->remember_token;
         // $newstudentrecord->mobileredirecturl = $enrolledstudent->data->mobileRedirectUrl;
 
-        $DB->insert_record('extintmaxx_user', $newstudentrecord);
+        //$DB->insert_record('extintmaxx_user', $newstudentrecord);
         return $newstudentrecord;
     }
 
@@ -191,7 +191,7 @@ class provider_api_method_chains {
         foreach ($getallcourses->data as $course) {
             $coursedata = [
                 'provider' => $adminrecord->provider,
-                'referraltypeid' => $course->referraltype_id,
+                'referraltypeid' => $referral,
                 'providercourseid' => $course->course_id,
                 'courseguid' => $course->guid,
                 'providercoursename' => $course->course->title,
