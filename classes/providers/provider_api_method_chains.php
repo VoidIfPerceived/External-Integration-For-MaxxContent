@@ -35,7 +35,7 @@ class provider_api_method_chains {
         if (!$course) {
             $providerrecord = $DB->get_records('extintmaxx_provider', array('provider' => $provider));
         } else {
-            $providerrecord = $DB->get_records('extintmaxx_provider', array('provider' => $provider, 'providercourseid' => $course));
+            $providerrecord = $DB->get_record('extintmaxx_provider', array('provider' => $provider, 'providercourseid' => $course));
         }
         if (!$providerrecord) {
             return false;
@@ -49,15 +49,26 @@ class provider_api_method_chains {
      * @todo @param int $courseid The supplied course id the DB will check the user for.
      * @return object $student Array Containing the retrieved DB object of user and a bool of the validity of the request 
      */
-    function student_record_exists($userid, $provider) {
+    function student_record_exists($userid, $provider, $courseid=null) {
         global $DB;
-        $studentdata = $DB->get_record(
-            'extintmaxx_user',
-            array(
-                'userid' => $userid,
-                'provider' => $provider
-            )
-        );
+        if (!$courseid) {
+            $studentdata = $DB->get_record(
+                'extintmaxx_user',
+                array(
+                    'userid' => $userid,
+                    'provider' => $provider
+                )
+            );
+        } else {
+            $studentdata = $DB->get_record(
+                'extintmaxx_user',
+                array(
+                    'userid' => $userid,
+                    'provider' => $provider,
+                    'courseid' => $courseid
+                )
+            );
+        }
         /** @todo $studentdata->courseid Allow users to be enrolled in more than one course within a given courseid */
         if (!$studentdata) {
             $student = array(
@@ -92,7 +103,7 @@ class provider_api_method_chains {
      * @param object $provider Provider object returned from admin_record_exists() method
      * @return object $newstudentrecord Copy of record data inserted into DB
     */
-    function enroll_student($adminlogin, $provider) {
+    function enroll_student($adminlogin, $provider, $module) {
         global $DB, $USER;
         $acci = new acci();
         //Parse initial data
@@ -106,11 +117,11 @@ class provider_api_method_chains {
         $referraltypes = $acci->get_referral_types_by_admin($admintoken);
         $referraltypeid = $referraltypes->data[0]->referraltype_id;
 
-        $getallcourses = $acci->get_all_courses($admintoken, $referraltypeid);
         $getagencies = $acci->get_agency_by_state_id($admintoken, $statecode);
+
         /** @todo $courseid Add Course Selector to Mod Form */
-        $courseid = $getallcourses->data[0]->course_id;
-        $agencyid = $getagencies->data[0]->id;
+        $courseid = $module->providercourseid;
+        $agencyid = 0;
 
         $password = random_string();
 
@@ -128,11 +139,14 @@ class provider_api_method_chains {
             $USER->id
         );
 
+
+
         $newstudentrecord = new stdClass;
         $newstudentrecord->provider = $provider->provider;
         $newstudentrecord->userid = $USER->id;
         $newstudentrecord->redirecturl = $enrolledstudent->data->redirectUrl;
         $newstudentrecord->provideruserid = $enrolledstudent->data->student->id;
+        $newstudentrecord->providercourseid = $courseid;
         /** @todo Add DB Fields for following properties */
         // $newstudentrecord->password = $password;
         // $newstudentrecord->studenttoken = $enrolledstudent->data->token;
@@ -148,14 +162,14 @@ class provider_api_method_chains {
      * @param string $provider
      * @return object $redirecturl
      */
-    function student_login($userid, $provider) {
+    function student_login($userid, $provider, $module) {
         $acci = new acci();
         $adminrecord = $this->admin_record_exists($provider);
         $studentrecord = $this->student_record_exists($userid, $provider);
-        if ($adminrecord && !$studentrecord['student']) {
+        if ($adminrecord && (!$studentrecord['student'] || $studentrecord['student']->courseid != $module->providercourseid)) {
             //If user has an entry for this provider in the database
             //Return student info
-            return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord);
+            return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord, $module);
         } else if ($adminrecord && $studentrecord['student']) {
             return $studentrecord['student'];
             //If user does not have an entry for this provider in the database
@@ -163,52 +177,37 @@ class provider_api_method_chains {
         }
     }
 
-    function get_all_provider_referral_types($provider) {
-        $acci = new acci();
-        $adminrecord = $this->admin_record_exists($provider);
-        $adminlogin = $acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword);
-        $admintoken = $adminlogin->data->token;
-        
-        $referral = $acci->get_referral_types_by_admin($admintoken);
-        $referraltypes = array();
-
-        foreach ($referral->data as $index) {
-            $findreferralid = $index->referraltype_id;
-            array_push($referraltypes, $findreferralid);
-        }
-
-        return $referraltypes;
-    }
-
     function update_provider_courses($provider) {
         global $DB;
         $acci = new acci();
         $adminrecord = $this->admin_record_exists($provider);
         $adminlogin = $acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword);
-        $referraltypes = $this->get_all_provider_referral_types($adminrecord->provider);
         $admintoken = $adminlogin->data->token;
         $courses = array();
-        foreach ($referraltypes as $referraltypeid) {
-            $getallcourses = $acci->get_all_courses($admintoken, $referraltypeid);
-            $course = [
+
+        $referral = $acci->get_referral_types_by_admin($admintoken)->data[0]->referraltype_id;
+        $getallcourses = $acci->get_all_courses($admintoken, $referral);
+
+        foreach ($getallcourses->data as $course) {
+            $coursedata = [
                 'provider' => $adminrecord->provider,
-                'referraltypeid' => $referraltypeid,
-                'providercourseid' => $getallcourses->data[0]->course_id,
-                'courseguid' => $getallcourses->data[0]->guid,
-                'providercoursename' => $getallcourses->data[0]->course->title,
-                'providercoursedesc' => $getallcourses->data[0]->course->description
+                'referraltypeid' => $course->referraltype_id,
+                'providercourseid' => $course->course_id,
+                'courseguid' => $course->guid,
+                'providercoursename' => $course->course->title,
+                'providercoursedesc' => $course->course->description
             ];
-            $courseexists = $this->provider_record_exists($adminrecord->provider, $course['providercourseid']);
+            $courseexists = $this->provider_record_exists($adminrecord->provider, $coursedata['providercourseid']);
             if ($courseexists) {
                 $id = $DB->get_field(
                     'extintmaxx_provider',
                     'id',
-                    ['provider' => $provider, 'providercourseid' => $course['providercourseid']]
+                    ['provider' => $provider, 'providercourseid' => $coursedata['providercourseid']]
                 );
-                $course['id'] = $id;
-                $DB->update_record('extintmaxx_provider', $course);
+                $coursedata['id'] = $id;
+                $DB->update_record('extintmaxx_provider', $coursedata);
             } else {
-                $DB->insert_record('extintmaxx_provider', $course);
+                $DB->insert_record('extintmaxx_provider', $coursedata);
             }
         }
     }

@@ -24,6 +24,8 @@ $cm = get_coursemodule_from_id('extintmaxx', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $module = $DB->get_record('extintmaxx', array('id' => $cm->instance), '*', MUST_EXIST);
 $provider = $DB->get_record('extintmaxx_admin', array('provider' => $module->provider), '*');
+$providercourse = $methodchains->provider_record_exists($provider->provider, $module->providercourseid);
+$providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
 
 $PAGE->set_context(context_system::instance());
 
@@ -45,11 +47,11 @@ echo $OUTPUT->header();
 if (isguestuser() == true) {
     $redirecturl = 'invalidlogin';
 } else {
-    $redirecturl = $methodchains->student_login($USER->id, $provider->provider)->redirecturl;
+    $redirecturl = $providerstudent->redirecturl;
 }
 
 echo student_view($redirecturl);
 
-$getcoursedatacheck = $methodchains->get_students_course_data($acci->admin_login($provider->providerusername, $provider->providerpassword), "acci", 242, [327247, 327510, 327511]);
+print_object($getcoursedatacheck = $methodchains->get_students_course_data($acci->admin_login($provider->providerusername, $provider->providerpassword), $provider->provider, $providercourse->providercourseid, [$providerstudent->provideruserid]));
 
 echo $OUTPUT->footer();

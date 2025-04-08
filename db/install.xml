@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/extintmaxx/db" VERSION="20250404" COMMENT="XMLDB file for Moodle mod/extintmaxx"
+<XMLDB PATH="mod/extintmaxx/db" VERSION="20250408" COMMENT="XMLDB file for Moodle mod/extintmaxx"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -26,6 +26,7 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle's user id of the student whose access credentials are stored, used for reference between Moodle's user table and Extintmaxx's user table."/>
         <FIELD NAME="redirecturl" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The redirect_url for the user attempting to access courses using the External Integration for MaxxContent plugin."/>
         <FIELD NAME="provideruserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The id of the user within the provider's data structure."/>
+        <FIELD NAME="providercourseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The course id given by the provider in which the user is enrolled in."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -51,7 +52,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="provider" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Provider providing the course."/>
         <FIELD NAME="providercourseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course ID for the provided course."/>
-        <FIELD NAME="courseguid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The guid for the provided course."/>
+        <FIELD NAME="courseguid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The guid for the provided course."/>
         <FIELD NAME="providercoursename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the provided course."/>
         <FIELD NAME="providercoursedesc" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the provided course."/>
       </FIELDS>

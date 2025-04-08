@@ -65,9 +65,9 @@ if ($mform->is_cancelled()) {
         $methodchains->update_provider_courses($provider);
 
         $mform->display();
-        $time = new DateTime("now", new DateTimeZone('America'));
+        $time = new DateTime("now", new DateTimeZone('UTC'));
         $time->format("F j, Y, g:i a T");
-        echo "<br><h4>New Provider Information Received. $time</h4>";
+        echo "<br><h4>New Provider Information Received. ".$time->format("F j, Y, g:i:s a T")."</h4>";
     }
 } else {
     $provider = 'acci';

@@ -14,11 +14,9 @@ function extintmaxx_add_instance($instancedata, $mform = null) {
     }
 
     $selectedcourse = $methodchains->provider_record_exists($instancedata->provider, $instancedata->providercourse);
-    foreach ($selectedcourse as $course) {
-        $instancedata->providercourseid = $course->providercourseid;
-        $instancedata->providercoursename = $course->providercoursename;
-    }
 
+    $instancedata->providercourseid = $selectedcourse->providercourseid;
+    $instancedata->providercoursename = $selectedcourse->providercoursename;
     $instancedata->name = get_string($instancedata->provider, 'extintmaxx')." - ".$instancedata->providercoursename;
     $instancedata->timecreated = time();
     $instancedata->timemodified = time();
