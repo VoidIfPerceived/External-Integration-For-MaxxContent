@@ -41,9 +41,14 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
         $mform->addElement('header', 'pluginspecificheader', get_string('pluginspecificheader', 'extintmaxx'));
 
         $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
-        $mform->addHelpButton('provider', 'providersselection_help', 'extintmaxx');
+        $mform->addHelpButton('provider', 'providersselection', 'extintmaxx');
 
         $mform->addElement('select', 'providercourse', get_string('providercourse', 'extintmaxx'), $this->get_all_provider_courses('acci'));
+        $mform->addHelpButton('providercourse', 'providercourse', 'extintmaxx');
+
+        $mform->addElement('text', 'grade', get_string('grade', 'extintmaxx'));
+        $mform->setType('grade', PARAM_INT);
+        $mform->addHelpButton('grade', 'grade', 'extintmaxx');
 
         $this->add_action_buttons();
 

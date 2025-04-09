@@ -29,6 +29,8 @@ $providerstudent = $methodchains->student_login($USER->id, $provider->provider, 
 
 $PAGE->set_context(context_system::instance());
 
+print_object($acci->get_students_by_admin($acci->admin_login($provider->providerusername, $provider->providerpassword)->data->token));
+
 function student_view($redirecturl) {
     if ($redirecturl == 'invalidlogin') {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
@@ -51,7 +53,5 @@ if (isguestuser() == true) {
 }
 
 echo student_view($redirecturl);
-
-print_object($getcoursedatacheck = $methodchains->get_students_course_data($acci->admin_login($provider->providerusername, $provider->providerpassword), $provider->provider, $providercourse->providercourseid, [$providerstudent->provideruserid]));
 
 echo $OUTPUT->footer();

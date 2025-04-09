@@ -65,7 +65,7 @@ class provider_api_method_chains {
                 array(
                     'userid' => $userid,
                     'provider' => $provider,
-                    'courseid' => $courseid
+                    'providercourseid' => $courseid
                 )
             );
         }
@@ -105,6 +105,9 @@ class provider_api_method_chains {
     */
     function enroll_student($adminlogin, $provider, $module) {
         global $DB, $USER;
+        if (!isloggedin()) {
+            echo "<h4>Please log in to continue.</h4>";
+        }
         $acci = new acci();
         //Parse initial data
         $admintoken = $adminlogin->data->token;
@@ -136,7 +139,6 @@ class provider_api_method_chains {
             $agencyid,
             $referraltypeid,
             $courseid,
-            $USER->id
         );
 
         print_object($enrolledstudent);
@@ -153,7 +155,7 @@ class provider_api_method_chains {
         // $newstudentrecord->studentremembertoken = $enrolledstudent->data->remember_token;
         // $newstudentrecord->mobileredirecturl = $enrolledstudent->data->mobileRedirectUrl;
 
-        //$DB->insert_record('extintmaxx_user', $newstudentrecord);
+        $DB->insert_record('extintmaxx_user', $newstudentrecord);
         return $newstudentrecord;
     }
 
@@ -165,8 +167,12 @@ class provider_api_method_chains {
     function student_login($userid, $provider, $module) {
         $acci = new acci();
         $adminrecord = $this->admin_record_exists($provider);
-        $studentrecord = $this->student_record_exists($userid, $provider);
-        if ($adminrecord && (!$studentrecord['student'] || $studentrecord['student']->courseid != $module->providercourseid)) {
+        $studentrecord = $this->student_record_exists($userid, $provider, $module->providercourseid);
+        if ($adminrecord && $studentrecord['student'] == null) {
+            //If user has an entry for this provider in the database
+            //Return student info
+            return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord, $module);
+        } else if ($adminrecord && $studentrecord['student'] && $studentrecord['student']->providercourseid != $module->providercourseid) {
             //If user has an entry for this provider in the database
             //Return student info
             return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord, $module);

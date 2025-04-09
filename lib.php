@@ -2,6 +2,7 @@
 
 use core_tag\reportbuilder\local\entities\instance;
 use mod_extintmaxx\providers\provider_api_method_chains;
+use mod_extintmaxx\providers\acci;
 
 function extintmaxx_add_instance($instancedata, $mform = null) {
     global $DB;
@@ -24,6 +25,11 @@ function extintmaxx_add_instance($instancedata, $mform = null) {
 
     $id = $DB->insert_record('extintmaxx', $instancedata);
 
+    $instancedata->id = $id;
+    extintmaxx_grade_item_update($instancedata);
+
+    echo $id;
+
     return $id;
 
     // if ($mform->is_cancelled()) {
@@ -43,6 +49,8 @@ function extintmaxx_update_instance($instancedata, $mform): bool {
     $instancedata->timemodified = time();
     $instancedata->id = $instancedata->instance;
 
+    extintmaxx_grade_item_update($instancedata);
+
     return $DB->update_record('extintmaxx', $instancedata);
 }
 
@@ -55,12 +63,14 @@ function extintmaxx_delete_instance($id): bool {
 function extintmaxx_supports($feature) {
     switch ($feature) {
         case FEATURE_GRADE_HAS_GRADE: return true;
-
+        case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
+        case FEATURE_COMPLETION_HAS_RULES: return true;
         default: return null;
     }
 }
 
 function extintmaxx_grade_item_update($instance, $grades=NULL) {
+    global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
     if (property_exists($instance, 'cmidnumber')) { // May not be always present.
@@ -69,7 +79,7 @@ function extintmaxx_grade_item_update($instance, $grades=NULL) {
         $params = array('itemname' => $instance->name);
     }
 
-    if ($quiz->grade > 0) {
+    if ($instance->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $instance->grade;
         $params['grademin']  = 0;
@@ -77,6 +87,8 @@ function extintmaxx_grade_item_update($instance, $grades=NULL) {
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
+
+    grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grades, $params);
 }
 
 function extintmaxx_update_grades($instance, $userid = 0, $nullifnone = true) {
@@ -84,28 +96,53 @@ function extintmaxx_update_grades($instance, $userid = 0, $nullifnone = true) {
     require_once($CFG->libdir . '/gradelib.php');
 
     if ($instance->grade == 0) {
-        extintmaxx_grade_item_update($quiz);
+        extintmaxx_grade_item_update($instance);
 
-    } else if ($grades = extintmaxx_get_user_grades($quiz, $userid)) {
-        extintmaxx_grade_item_update($quiz, $grades);
+    } else if ($grades = extintmaxx_get_user_grades($instance, $userid)) {
+        extintmaxx_grade_item_update($instance, $grades);
 
     } else if ($userid && $nullifnone) {
         $grade = new stdClass();
         $grade->userid = $userid;
         $grade->rawgrade = null;
-        extintmaxx_grade_item_update($quiz, $grade);
+        extintmaxx_grade_item_update($instance, $grade);
 
     } else {
-        extintmaxx_grade_item_update($quiz);
+        extintmaxx_grade_item_update($instance);
     }
 }
 
 function extintmaxx_get_user_grades($instance, $userid = 0) {
     global $DB;
-
-    if ($userid) {
-        return $DB->get_record('extintmaxx_grades', ['userid' => $userid, 'extintmaxxid' => $instance->id]);
+    $acci = new acci();
+    $methodchains = new provider_api_method_chains();
+    $adminrecord = $methodchains->admin_record_exists($instance->provider);
+    $studentgrades = array();
+    if ($userid != 0) {
+        $studentrecord = $methodchains->student_record_exists($instance->providercourseid, $userid);
+        $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $studentrecord->provideruserid);
+        $studentcompletion = $studentcoursedata[0]->data->studentcourses->percentage_completed;
+        if ($studentcompletion == 100) {
+            $studentgrades[$userid] = $instance->grade;
+        } else {
+            $studentgrades[$userid] = 0;
+        };
     } else {
-        return $DB->get_records('extintmaxx_grades', ['extintmaxxid' => $instance->id]);
+        $students = $DB->get_records('extintmaxx_students', ['providercourseid' => $instance->providercourseid]);
+        $studentids = array();
+        foreach ($students as $student) {
+            array_push($studentids, $student->provideruserid);
+            $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $student->provideruserid);
+            $studentcompletion = array();
+            foreach ($studentcoursedata as $studentdata) {
+                $studentcompletion[$student->userid] = $studentdata->data->studentcourses->percentage_completed;
+                if ($studentcompletion[$student->userid] == 100) {
+                    $studentgrades[$student->userid] = $instance->grade;
+                } else {
+                    $studentgrades[$student->userid] = null;
+                };
+            }
+        }
+        
     }
 }
