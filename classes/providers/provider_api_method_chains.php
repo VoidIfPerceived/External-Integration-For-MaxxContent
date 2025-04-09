@@ -141,8 +141,6 @@ class provider_api_method_chains {
             $courseid,
         );
 
-        print_object($enrolledstudent);
-
         $newstudentrecord = new stdClass;
         $newstudentrecord->provider = $provider->provider;
         $newstudentrecord->userid = $USER->id;
