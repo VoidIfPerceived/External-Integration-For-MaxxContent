@@ -43,6 +43,30 @@ function extintmaxx_add_instance($instancedata, $mform = null) {
     // };
 }
 
+function find_array_object_id_by_param_value ($array, $needle, $magnet) {
+    foreach ($array as $haystack) {
+        $isfound = object_search($needle, $magnet, $haystack);
+        if ($isfound != false) {
+            return $isfound;
+        }
+    }
+    return false;
+}
+
+/**
+ * @param int|string $needle The value of the property you are looking for
+ * @param int|string $magnet The property you are looking for
+ * @param object $haystack The object you want to parse through
+ * @return int|string|bool returns the id of the object if needle is found
+ */
+function object_search($needle, $magnet, $haystack) {
+    if ($haystack->$magnet == $needle) {
+        return $haystack->id;
+    } else {
+        return false;
+    }
+}
+
 function extintmaxx_update_instance($instancedata, $mform): bool {
     global $DB;
 
@@ -81,14 +105,16 @@ function extintmaxx_grade_item_update($instance, $grades=NULL) {
 
     if ($instance->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $instance->grade;
-        $params['grademin']  = 0;
+        $params['grademax'] = $instance->grade;
+        $params['grademin'] = 0;
 
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
 
-    grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grades, $params);
+    foreach ($grades as $grade) {
+        grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grade->grade, $params);
+    }
 }
 
 function extintmaxx_update_grades($instance, $userid = 0, $nullifnone = true) {
@@ -118,31 +144,37 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
     $methodchains = new provider_api_method_chains();
     $adminrecord = $methodchains->admin_record_exists($instance->provider);
     $studentgrades = array();
-    if ($userid != 0) {
+    if ($userid != 0 && $userid != null) {
         $studentrecord = $methodchains->student_record_exists($instance->providercourseid, $userid);
         $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $studentrecord->provideruserid);
         $studentcompletion = $studentcoursedata[0]->data->studentcourses->percentage_completed;
-        if ($studentcompletion == 100) {
+        if ($studentcompletion > 0 /** @var TESTVALUE remove and reset to 100 when testing complete */) {
             $studentgrades[$userid] = $instance->grade;
         } else {
             $studentgrades[$userid] = 0;
         };
     } else {
-        $students = $DB->get_records('extintmaxx_students', ['providercourseid' => $instance->providercourseid]);
+        $students = $DB->get_records('extintmaxx_user', ['providercourseid' => $instance->providercourseid], true);
         $studentids = array();
         foreach ($students as $student) {
             array_push($studentids, $student->provideruserid);
-            $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $student->provideruserid);
-            $studentcompletion = array();
-            foreach ($studentcoursedata as $studentdata) {
-                $studentcompletion[$student->userid] = $studentdata->data->studentcourses->percentage_completed;
-                if ($studentcompletion[$student->userid] == 100) {
-                    $studentgrades[$student->userid] = $instance->grade;
-                } else {
-                    $studentgrades[$student->userid] = null;
-                };
-            }
         }
-        
+        $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $studentids);
+        $studentcompletion = array();
+        foreach ($studentcoursedata as $studentdata) {
+            $currentstudentcourseobjectid = find_array_object_id_by_param_value($students, $studentdata->userid, 'provideruserid');
+            $currentstudentid = $students[$currentstudentcourseobjectid]->userid;
+            $studentcompletion[$currentstudentid] = $studentdata->coursedata->data->studentcourses->percentage_completed;
+            if ($studentcompletion[$currentstudentid] > 99) {
+                $studentgrades[$currentstudentid]->grade = new stdClass;
+                $studentgrades[$currentstudentid]->grade->userid = $currentstudentid;
+                $studentgrades[$currentstudentid]->grade->rawgrade = $instance->grade;
+            } else {
+                $studentgrades[$currentstudentid]->grade = new stdClass;
+                $studentgrades[$currentstudentid]->grade->userid = $currentstudentid;
+                $studentgrades[$currentstudentid]->grade->rawgrade = null;
+            };
+        }
     }
+    return $studentgrades;
 }

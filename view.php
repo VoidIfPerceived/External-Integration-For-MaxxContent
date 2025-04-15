@@ -1,9 +1,11 @@
 <?php
 
 use core\analytics\analyser\student_enrolments;
+use core\session\exception;
 use core_reportbuilder\external\columns\sort\get;
 use mod_extintmaxx\providers\acci;
 use mod_extintmaxx\providers\provider_api_method_chains;
+use mod_extintmaxx\task\acci_grade_check;
 
 require_once(__DIR__ . '/../../config.php');
 //Instance View Page
@@ -29,6 +31,16 @@ $providerstudent = $methodchains->student_login($USER->id, $provider->provider, 
 
 $PAGE->set_context(context_system::instance());
 
+function update_completion_data($provider) {
+    if ($provider == 'acci') {
+        $accigradecheck = new acci_grade_check();
+        echo "acci gradecheck through adhoc:";
+        \core\task\manager::queue_adhoc_task($accigradecheck, true);
+        echo "acci gradecheck through direct execute:";
+        $accigradecheck->execute();
+    }
+}
+
 function student_view($redirecturl) {
     if ($redirecturl == 'invalidlogin') {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
@@ -49,6 +61,7 @@ if (isguestuser() == true) {
 } else {
     $redirecturl = $providerstudent->redirecturl;
 }
+echo update_completion_data('acci');
 
 echo student_view($redirecturl);
 
