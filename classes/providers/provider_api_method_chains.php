@@ -147,6 +147,7 @@ class provider_api_method_chains {
         $newstudentrecord->redirecturl = $enrolledstudent->data->redirectUrl;
         $newstudentrecord->provideruserid = $enrolledstudent->data->student->id;
         $newstudentrecord->providercourseid = $courseid;
+        $newstudentrecord->instanceid = $module->id;
         /** @todo Add DB Fields for following properties */
         // $newstudentrecord->password = $password;
         // $newstudentrecord->studenttoken = $enrolledstudent->data->token;

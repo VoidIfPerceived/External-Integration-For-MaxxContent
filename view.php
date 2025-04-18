@@ -31,6 +31,46 @@ $providerstudent = $methodchains->student_login($USER->id, $provider->provider, 
 
 $PAGE->set_context(context_system::instance());
 
+function admin_actions($providerstudent, $courseid) {
+    $reportingurl = "/mod/extintmaxx/reporting.php?courseid=$courseid";
+    echo "<a href='$reportingurl'>View Reporting</a>";
+}
+
+function view_reporting() {
+
+}
+
+function return_to_course_url() {
+
+}
+
+function acci_course_url($providerstudent, $providercourse, $providerrecord) {
+    $methodchains = new provider_api_method_chains();
+    $acci = new acci();
+    $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($providerrecord->providerusername, $providerrecord->providerpassword), $providerrecord->provider, $providercourse->providercourseid, [$providerstudent->provideruserid]);
+    $studentcompletion = $studentcoursedata[0]->coursedata->data->studentcourses->percentage_completed;
+    if ($studentcompletion > 0) {
+        $studentcourses = $studentcoursedata[0]->coursedata->data->studentcourses;
+        $currentframeid = $studentcourses->frame_id;
+        $nextframeid = $studentcourses->next_frame_id;
+        $previousframeid = $studentcourses->previous_frame_id;
+        $courseforwardurl = "https://www.lifeskillslink.com/studentcourse?id=$providercourse->providercourseid&student_id=$providerstudent->provideruserid&fid=$currentframeid&next_frame_id=$nextframeid&previous_frame_id=$previousframeid";
+    } else {
+        $courseforwardurl = "https://www.lifeskillslink.com/studentcourse?id=$providercourse->providercourseid&student_id=$providerstudent->provideruserid";
+    }
+
+    return $courseforwardurl;
+}
+
+function get_redirect_url($providerstudent) {
+    if (isguestuser() == true) {
+        $redirecturl = 'invalidlogin';
+    } else {
+        $redirecturl = $providerstudent->redirecturl;
+    }
+    return $redirecturl;
+}
+
 function update_completion_data($provider) {
     if ($provider == 'acci') {
         $accigradecheck = new acci_grade_check();
@@ -41,28 +81,39 @@ function update_completion_data($provider) {
     }
 }
 
-function student_view($redirecturl) {
+function generate_iframe($redirecturl, $courseforwardurl) {
     if ($redirecturl == 'invalidlogin') {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
         return $viewurl;
     } else {
-        $viewurl = "<iframe style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>";
+        $viewurl = "<iframe id=\"viewurl\" style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>
+        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>";
         return $viewurl;
     }
 }
 
+function view_page($providerstudent, $providercourse, $provider) {
+    $redirecturl = get_redirect_url($providerstudent);
+    $accicourseurl = acci_course_url($providerstudent, $providercourse, $provider);
+    $iframe = generate_iframe($redirecturl, $accicourseurl);
+    echo $iframe;
+}
+
 $PAGE->set_url('/mod/extintmaxx/view.php', array('id' => $cm->id));
 $PAGE->set_title('External Integration for Maxx Content');
-$PAGE->set_pagelayout('incourse');
 
 echo $OUTPUT->header();
-if (isguestuser() == true) {
-    $redirecturl = 'invalidlogin';
-} else {
-    $redirecturl = $providerstudent->redirecturl;
-}
-echo update_completion_data('acci');
 
-echo student_view($redirecturl);
+
+
+if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::instance($cm->course))) {
+    $PAGE->set_context($context);
+    $PAGE->set_pagelayout('standard');
+    admin_actions($providerstudent, $course->id);
+} else {
+    $PAGE->set_context(context_system::instance());
+    $PAGE->set_pagelayout('incourse');
+    view_page($providerstudent, $providercourse, $provider);
+}
 
 echo $OUTPUT->footer();

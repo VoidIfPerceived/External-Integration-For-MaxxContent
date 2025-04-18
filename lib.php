@@ -148,10 +148,14 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
         $studentrecord = $methodchains->student_record_exists($instance->providercourseid, $userid);
         $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $studentrecord->provideruserid);
         $studentcompletion = $studentcoursedata[0]->data->studentcourses->percentage_completed;
-        if ($studentcompletion > 0 /** @var TESTVALUE remove and reset to 100 when testing complete */) {
-            $studentgrades[$userid] = $instance->grade;
+        if ($studentcompletion > 99) {
+            $studentgrades[$userid]->grade = new stdClass;
+            $studentgrades[$userid]->grade->userid = $userid;
+            $studentgrades[$userid]->grade->rawgrade = $instance->grade;
         } else {
-            $studentgrades[$userid] = 0;
+            $studentgrades[$userid]->grade = new stdClass;
+            $studentgrades[$userid]->grade->userid = $userid;
+            $studentgrades[$userid]->grade->rawgrade = null;
         };
     } else {
         $students = $DB->get_records('extintmaxx_user', ['providercourseid' => $instance->providercourseid], true);

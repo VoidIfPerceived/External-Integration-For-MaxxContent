@@ -16,7 +16,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class mod_extintmaxx_manage_form extends moodleform {
-    function definition() {
+    public function definition() {
         global $CFG, $DB;
         $mform = $this->_form;
 

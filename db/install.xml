@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/extintmaxx/db" VERSION="20250409" COMMENT="XMLDB file for Moodle mod/extintmaxx"
+<XMLDB PATH="mod/extintmaxx/db" VERSION="20250418" COMMENT="XMLDB file for Moodle mod/extintmaxx"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -28,6 +28,10 @@
         <FIELD NAME="redirecturl" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The redirect_url for the user attempting to access courses using the External Integration for MaxxContent plugin."/>
         <FIELD NAME="provideruserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The id of the user within the provider's data structure."/>
         <FIELD NAME="providercourseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The course id given by the provider in which the user is enrolled in."/>
+        <FIELD NAME="instanceid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The instance within Moodle a student's information is used for."/>
+        <FIELD NAME="currentframeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The current frame id for the stored provider course."/>
+        <FIELD NAME="previousframeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Previous frame id for the stored provider course"/>
+        <FIELD NAME="nextframeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Next frame id for the stored provider course"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

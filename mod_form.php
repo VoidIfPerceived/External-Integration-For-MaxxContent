@@ -38,7 +38,7 @@ class mod_extintmaxx_mod_form extends \moodleform_mod {
 
         $this->standard_coursemodule_elements();
 
-        $mform->addElement('header', 'externalcourseselection', get_string('pluginspecificheader', 'externalcourseselection'));
+        $mform->addElement('header', 'externalcourseselection', get_string('pluginspecificheader', 'extintmaxx'));
 
         $mform->addElement('select', 'provider', get_string('providersselection', 'extintmaxx'), $provideroptions);
         $mform->addHelpButton('provider', 'providersselection', 'extintmaxx');
