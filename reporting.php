@@ -40,7 +40,11 @@ function get_allowed_students($caplevel, $instances) {
     $allstudentinfo = array();
     foreach ($instances as $instance) {
         $studentsbyinstanceid = $DB->get_records('extintmaxx_user', ['instanceid' => $instance->id]);
-        array_push($allstudentinfo, $studentsbyinstanceid);
+        if ($allstudentinfo == []) {
+            
+        } else {
+            array_push($allstudentinfo, $studentsbyinstanceid);
+        }
     }
     while (count($studentsbyinstance) < count($allstudentinfo)) {
         foreach ($allstudentinfo[count($studentsbyinstance)] as $student) {
@@ -72,9 +76,6 @@ function parse_table_information($caplevel, $requesteddata = [], $students, $adm
     $providercourseids = array_unique($providercourseids);
     $studentsbyprovidercourse = array();
     foreach ($providercourseids as $providercourseid) {
-        if ($providercourseid ) {
-
-        }
         $studentdata = $methodchains->get_students_course_data($adminrecord, 'acci', $providercourseid, $provideruserids);
         if ($studentdata) {
             array_push($studentsbyprovidercourse, $studentdata);
@@ -127,10 +128,14 @@ function table_row($ishead = false, $rowdata = []) {
 function render_data_table($caplevel, $adminrecord, $columns = [], $data = []) {
     $acci = new acci();
     $table = ["<table>"];
+    $allowedstudents = get_allowed_students($caplevel, get_allowed_extintmaxx_instances($caplevel));
+    if (count($allowedstudents) === 0) {
+        return "<p>No students found.</p>";
+    }
     $rowdata = parse_table_information(
         $caplevel,
         $columns, 
-        get_allowed_students($caplevel, get_allowed_extintmaxx_instances($caplevel)), 
+        $allowedstudents,
         $acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword)
     );
     $th = table_row(true, $columns);

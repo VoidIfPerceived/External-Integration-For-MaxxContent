@@ -86,8 +86,27 @@ function generate_iframe($redirecturl, $courseforwardurl) {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
         return $viewurl;
     } else {
-        $viewurl = "<iframe id=\"viewurl\" style=\"position: relative; top: 0; right: 0; bottom: 0; left: 0\" src=\"$redirecturl\" width=\"100%\" height=\"1200px\"></iframe>
-        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>";
+        $viewurl = 
+        "<div style=\"
+            position: relative; 
+            overflow:hidden;
+            position:relative;
+            top:-60px;
+            width:100%;
+            height:740px;
+        \">
+        <iframe id=\"viewurl\" 
+            style=\"
+            position:absolute;
+            top:-60px;
+            height:740px;
+            width:100%;
+            left:0;
+            scrolling:no;
+        </div>
+} src=\"$redirecturl\"></iframe>
+        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>
+        ";
         return $viewurl;
     }
 }
