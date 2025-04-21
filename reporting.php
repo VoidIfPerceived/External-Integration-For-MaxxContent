@@ -1,5 +1,6 @@
 <?php
 
+use core_reportbuilder\external\columns\sort\get;
 use mod_extintmaxx\providers\provider_api_method_chains;
 use mod_extintmaxx\providers\acci;
 require_once(__DIR__ . '/../../config.php');
@@ -36,11 +37,15 @@ function get_allowed_extintmaxx_instances($caplevel, $courseid=null) {
 function get_allowed_students($caplevel, $instances) {
     $studentsbyinstance = array();
     global $DB;
+    $allstudentinfo = array();
     foreach ($instances as $instance) {
-        $students = $DB->get_records('extintmaxx_user', ['instanceid' => $instance->id]);
+        $studentsbyinstanceid = $DB->get_records('extintmaxx_user', ['instanceid' => $instance->id]);
+        array_push($allstudentinfo, $studentsbyinstanceid);
     }
-    foreach ($students as $student) {
-        array_push($studentsbyinstance, $student);
+    while (count($studentsbyinstance) < count($allstudentinfo)) {
+        foreach ($allstudentinfo[count($studentsbyinstance)] as $student) {
+            array_push($studentsbyinstance, $student);
+        }
     }
     return $studentsbyinstance;
 }
@@ -60,24 +65,40 @@ function parse_table_information($caplevel, $requesteddata = [], $students, $adm
         array_push($instancesbycourseid, $instances);
     }
     $providercourseids = array();
-    foreach ($instancesbycourseid as $instance) {
-        $providercourseid = $instance[1]->providercourseid;
+    while (count($providercourseids) < count($instancesbycourseid)) {
+        $providercourseid = $instances[count($providercourseids)+1]->providercourseid;
         array_push($providercourseids, $providercourseid);
     }
+    $providercourseids = array_unique($providercourseids);
     $studentsbyprovidercourse = array();
     foreach ($providercourseids as $providercourseid) {
+        if ($providercourseid ) {
+
+        }
         $studentdata = $methodchains->get_students_course_data($adminrecord, 'acci', $providercourseid, $provideruserids);
-        array_push($studentsbyprovidercourse, $studentdata);
+        if ($studentdata) {
+            array_push($studentsbyprovidercourse, $studentdata);
+        }
     }
     foreach ($studentsbyprovidercourse as $studentdata) {
         foreach ($studentdata as $student) {
-            $student = $student->data;
+            $student = $student->coursedata->data;
             $rowdata = array();
             foreach ($requesteddata as $field) {
-                $data = $student->$field;
+                $fieldarray = explode(':', $field);
+                $x = count($fieldarray);
+                if ($x < 2) {
+                    $data = $student->{$fieldarray[0]};
+                } else if ($x < 3) {
+                    $data = $student->{$fieldarray[0]}->{$fieldarray[1]};
+                } else if ($x < 4) {
+                    $data = $student->{$fieldarray[0]}->{$fieldarray[1]}->{$fieldarray[2]};
+                } else {
+                    new Exception("Field Flooded! Specified field is too deep.");
+                };
                 array_push($rowdata, $data);
             }
-            table_row(false, $rowdata);
+            array_push($tabledata, table_row(false, $rowdata));
         }
     }
     return $tabledata;
@@ -87,7 +108,8 @@ function table_row($ishead = false, $rowdata = []) {
     $tr = ["<tr>"];
     if ($ishead == true) {
         foreach ($rowdata as $column) {
-            $th = "<th>$column</th>";
+            $columnname = get_string($column, 'extintmaxx');
+            $th = "<th>$columnname</th>";
             array_push($tr, $th);
         }
     } else {
@@ -116,7 +138,9 @@ function render_data_table($caplevel, $adminrecord, $columns = [], $data = []) {
         array_push($table, $header);
     }
     foreach ($rowdata as $object) {
-        array_push($table, $object);
+        foreach ($object as $column) {
+            array_push($table, $column);
+        }
     }
         //Need length of columns array
     
@@ -145,10 +169,10 @@ $searchcolumns = [
     'firstname',
     'lastname',
     'email',
-    'studentcourses->student_id',
-    'studentcourses->course_id',
-    'studentcourses->percentage_completed',
-    'course->title'
+    'studentcourses:student_id',
+    'studentcourses:course_id',
+    'studentcourses:percentage_completed',
+    'studentcourses:course:title'
 ];
 
 echo implode("", render_data_table($caplevel, $adminrecord, $searchcolumns));

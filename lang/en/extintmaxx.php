@@ -111,3 +111,12 @@ defined('MOODLE_INTERNAL') || die();
 // Error Strings
     $string['invalidcredentials'] = 'Provided user credentials are invalid, please check username and password.';
     $string['required'] = 'Missing Required Fields';
+
+// Reporting Fields
+    $string['firstname'] = 'First Name';
+    $string['lastname'] = 'Last Name';
+    $string['email'] = 'Email';
+    $string['studentcourses:student_id'] = 'Student ID';
+    $string['studentcourses:course_id'] = 'Course ID';
+    $string['studentcourses:percentage_completed'] = 'Percentage Completed';
+    $string['studentcourses:course:title'] = 'Course Name';

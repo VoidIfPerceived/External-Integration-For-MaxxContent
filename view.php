@@ -27,7 +27,7 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 $module = $DB->get_record('extintmaxx', array('id' => $cm->instance), '*', MUST_EXIST);
 $provider = $DB->get_record('extintmaxx_admin', array('provider' => $module->provider), '*');
 $providercourse = $methodchains->provider_record_exists($provider->provider, $module->providercourseid);
-$providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
+
 
 $PAGE->set_context(context_system::instance());
 
@@ -111,6 +111,7 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $PAGE->set_pagelayout('standard');
     admin_actions($providerstudent, $course->id);
 } else {
+    $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
     view_page($providerstudent, $providercourse, $provider);
