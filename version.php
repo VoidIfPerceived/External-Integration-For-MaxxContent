@@ -2,7 +2,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2025042100; // Date of latest version of module (Date: YYYYMMDDXX)
+$plugin->version = 2025042101; // Date of latest version of module (Date: YYYYMMDDXX)
 $plugin->component = 'mod_extintmaxx'; // Full name of the plugin
 $plugin->release = '1.0'; // Current readable version number (as seen on the page: Plugins/Plugins Overview/)
 $plugin->maturity = MATURITY_RC; // Current stability of plugin
