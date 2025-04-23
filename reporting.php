@@ -40,9 +40,7 @@ function get_allowed_students($caplevel, $instances) {
     $allstudentinfo = array();
     foreach ($instances as $instance) {
         $studentsbyinstanceid = $DB->get_records('extintmaxx_user', ['instanceid' => $instance->id]);
-        if ($allstudentinfo == []) {
-            
-        } else {
+        if (count($studentsbyinstanceid) > 0) {
             array_push($allstudentinfo, $studentsbyinstanceid);
         }
     }
@@ -110,7 +108,7 @@ function table_row($ishead = false, $rowdata = []) {
     if ($ishead == true) {
         foreach ($rowdata as $column) {
             $columnname = get_string($column, 'extintmaxx');
-            $th = "<th>$columnname</th>";
+            $th = "<th scope=\"col\">$columnname</th>";
             array_push($tr, $th);
         }
     } else {
@@ -125,12 +123,14 @@ function table_row($ishead = false, $rowdata = []) {
 
 /** @param array $columns Contains the values that are used as column titles as well as search terms */
 /** @param array $data More specific than columns, contains objects which consist of a column and a piece of data to search for */
-function render_data_table($caplevel, $adminrecord, $columns = [], $data = []) {
+function render_data_table($caplevel, $adminrecord, $columns = [], $data = [], $courseid) {
+    global $CFG, $OUTPUT;
     $acci = new acci();
-    $table = ["<table>"];
+    $table = [];
+    array_push($table, "<table class=\"generaltable\">");
     $allowedstudents = get_allowed_students($caplevel, get_allowed_extintmaxx_instances($caplevel));
     if (count($allowedstudents) === 0) {
-        return "<p>No students found.</p>";
+        return "<p>No students found.</p><br><a href=\"{$CFG->wwwroot}/course/view.php?id=$courseid\">Back to course</a>";
     }
     $rowdata = parse_table_information(
         $caplevel,
@@ -180,6 +180,12 @@ $searchcolumns = [
     'studentcourses:course:title'
 ];
 
-echo implode("", render_data_table($caplevel, $adminrecord, $searchcolumns));
+$tablerender = render_data_table($caplevel, $adminrecord, $searchcolumns, [], $courseid);
+
+if (gettype($tablerender) == 'string') {
+    echo $tablerender;
+} else {
+    echo implode("", $tablerender);
+}
 
 echo $OUTPUT->footer();

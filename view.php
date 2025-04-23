@@ -93,8 +93,8 @@ function generate_iframe($redirecturl, $courseforwardurl) {
             position:relative;
             top:-60px;
             width:100%;
-            height:740px;
-        \">
+            height:740px;\"
+        >
         <iframe id=\"viewurl\" 
             style=\"
             position:absolute;
@@ -102,11 +102,9 @@ function generate_iframe($redirecturl, $courseforwardurl) {
             height:740px;
             width:100%;
             left:0;
-            scrolling:no;
-        </div>
-} src=\"$redirecturl\"></iframe>
-        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>
-        ";
+            scrolling:no;\"
+            src=\"$redirecturl\"></iframe></div>
+        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>";
         return $viewurl;
     }
 }

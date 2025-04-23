@@ -4,6 +4,31 @@ use core_tag\reportbuilder\local\entities\instance;
 use mod_extintmaxx\providers\provider_api_method_chains;
 use mod_extintmaxx\providers\acci;
 
+function extintmaxx_get_coursemodule_info($coursemodule) {
+    global $CFG, $DB;
+    require_once("$CFG->libdir/filelib.php");
+
+    $context = context_module::instance($coursemodule->id);
+    $instance = $DB->get_record('extintmaxx', ['id' => $coursemodule->instance], '*', MUST_EXIST);
+    
+    $cachedcminfo = new cached_cm_info();
+
+    $cachedcminfo->name = $instance->name;
+    
+    switch ($instance->provider) {
+        case 'acci':
+            $cachedcminfo->icon = 'mod/extintmaxx/pix';
+            $cachedcminfo->iconcomponent = 'lifeskillslink';
+            break;
+        default:
+            $cachedcminfo->icon = 'mod/extintmaxx/pix';
+            $cachedcminfo->iconcomponent = 'extintmaxx';
+            break;
+    }
+    
+    return $cachedcminfo;
+}
+
 function extintmaxx_add_instance($instancedata, $mform = null) {
     global $DB;
     $methodchains = new provider_api_method_chains();
