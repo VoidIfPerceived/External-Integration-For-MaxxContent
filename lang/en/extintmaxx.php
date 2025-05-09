@@ -106,7 +106,7 @@ defined('MOODLE_INTERNAL') || die();
 
 // Task Strings
 /** Regular ACCI Check Task */
-    $string['regular_acci_check'] = 'Scheduled ACCI Completion Check';
+    $string['timed_grade_check'] = 'Scheduled ACCI Completion Check';
 
 // Error Strings
     $string['invalidcredentials'] = 'Provided user credentials are invalid, please check username and password.';

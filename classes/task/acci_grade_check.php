@@ -3,7 +3,7 @@
 namespace mod_extintmaxx\task;
 defined('MOODLE_INTERNAL') || die();
 
-require(__DIR__ . '../../../lib.php');
+require_once(__DIR__ . '../../../lib.php');
 
 class acci_grade_check extends \core\task\adhoc_task {
 
