@@ -6,6 +6,7 @@ use mod_extintmaxx\providers\acci;
 require_once(__DIR__ . '/../../config.php');
 
 global $USER, $DB;
+$PAGE->set_context(context_system::instance());
 $methodchains = new provider_api_method_chains();
 $acci = new acci();
 $adminrecord = $methodchains->admin_record_exists('acci');
@@ -81,23 +82,27 @@ function parse_table_information($caplevel, $requesteddata = [], $students, $adm
     }
     foreach ($studentsbyprovidercourse as $studentdata) {
         foreach ($studentdata as $student) {
-            $student = $student->coursedata->data;
-            $rowdata = array();
-            foreach ($requesteddata as $field) {
-                $fieldarray = explode(':', $field);
-                $x = count($fieldarray);
-                if ($x < 2) {
-                    $data = $student->{$fieldarray[0]};
-                } else if ($x < 3) {
-                    $data = $student->{$fieldarray[0]}->{$fieldarray[1]};
-                } else if ($x < 4) {
-                    $data = $student->{$fieldarray[0]}->{$fieldarray[1]}->{$fieldarray[2]};
-                } else {
-                    new Exception("Field Flooded! Specified field is too deep.");
-                };
+            if (!$student->coursedata->errors) {
+                $student = $student->coursedata->data;
+                $rowdata = array();
+                foreach ($requesteddata as $field) {
+                    $fieldarray = explode(':', $field);
+                    $x = count($fieldarray);
+                    if ($x < 2) {
+                        $data = $student->{$fieldarray[0]};
+                    } else if ($x < 3) {
+                        $data = $student->{$fieldarray[0]}->{$fieldarray[1]};
+                    } else if ($x < 4) {
+                        $data = $student->{$fieldarray[0]}->{$fieldarray[1]}->{$fieldarray[2]};
+                    } else {
+                        new Exception("Field Flooded! Specified field is too deep.");
+                    };
                 array_push($rowdata, $data);
-            }
+                }
             array_push($tabledata, table_row(false, $rowdata));
+            } else {
+                continue;
+            }
         }
     }
     return $tabledata;
@@ -171,13 +176,13 @@ if (has_capability('mod/extintmaxx:fullreporting', $context = context_system::in
 }
 
 $searchcolumns = [
+    'studentcourses:student_id',
     'firstname',
     'lastname',
     'email',
-    'studentcourses:student_id',
-    'studentcourses:course_id',
+    'studentcourses:course:title',
     'studentcourses:percentage_completed',
-    'studentcourses:course:title'
+    'studentcourses:total_timetaken',
 ];
 
 $tablerender = render_data_table($caplevel, $adminrecord, $searchcolumns, [], $courseid);

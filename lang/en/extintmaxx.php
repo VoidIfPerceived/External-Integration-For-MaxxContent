@@ -120,4 +120,5 @@ defined('MOODLE_INTERNAL') || die();
     $string['studentcourses:course_id'] = 'Course ID';
     $string['studentcourses:percentage_completed'] = 'Percentage Completed';
     $string['studentcourses:course:title'] = 'Course Name';
+    $string['studentcourses:total_timetaken'] = 'Time Spent';
     $string['reporting'] = 'Reporting';
