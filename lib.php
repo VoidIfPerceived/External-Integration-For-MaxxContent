@@ -34,19 +34,7 @@ function extintmaxx_add_instance($instancedata, $mform = null) {
     $instancedata->id = $id;
     extintmaxx_grade_item_update($instancedata);
 
-    echo $id;
-
     return $id;
-
-    // if ($mform->is_cancelled()) {
-    //     return true;
-    // }
-    // else if ($fromform = $mform->get_data()) {
-    //     var_dump($fromform);
-    // } else {
-    //     $mform->set_data($toform);
-    //     $mform->display();
-    // };
 }
 
 function find_array_object_id_by_param_value ($array, $needle, $magnet) {
@@ -118,8 +106,12 @@ function extintmaxx_grade_item_update($instance, $grades=NULL) {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
 
-    foreach ($grades as $grade) {
-        grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grade->grade, $params);
+    if (gettype($grades) == 'array') {
+        foreach ($grades as $grade) {
+            grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grade->grade, $params);
+        }
+    } else {
+        grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, null, $params);
     }
 }
 
