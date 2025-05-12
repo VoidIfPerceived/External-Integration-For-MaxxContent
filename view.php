@@ -98,13 +98,13 @@ function generate_iframe($redirecturl, $courseforwardurl) {
         <iframe id=\"viewurl\" 
             style=\"
             position:absolute;
-            top:-80px;
+            top:-67px;
             height:740px;
             width:100%;
             left:0;
             scrolling:no;\"
-            src=\"$redirecturl\"></iframe></div>
-        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>";
+            href=\"$redirecturl\"></iframe></div>
+        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href=\"$courseforwardurl\";</script>";
         return $viewurl;
     }
 }
@@ -119,8 +119,8 @@ function view_page($providerstudent, $providercourse, $provider) {
 function back_to_course_button($courseid) {
     $returnurl = new moodle_url("/course/view.php", array('id' => $courseid));
     return "<a href=\"$returnurl\" style=\"
-    position:absolute;
-    z-index:1;
+    position:relative
+    z-index:1
     \"
     class=\"btn btn-primary btn-md\">
     Back To Course</a>";
