@@ -91,20 +91,20 @@ function generate_iframe($redirecturl, $courseforwardurl) {
             position: relative; 
             overflow:hidden;
             position:relative;
-            top:-60px;
+            top:0px;
             width:100%;
             height:740px;\"
         >
         <iframe id=\"viewurl\" 
             style=\"
             position:absolute;
-            top:-60px;
+            top:-67px;
             height:740px;
             width:100%;
             left:0;
             scrolling:no;\"
-            src=\"$redirecturl\"></iframe></div>
-        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href = \"$courseforwardurl\";</script>";
+            href=\"$redirecturl\"></iframe></div>
+        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href=\"$courseforwardurl\";</script>";
         return $viewurl;
     }
 }
@@ -113,15 +113,23 @@ function view_page($providerstudent, $providercourse, $provider) {
     $redirecturl = get_redirect_url($providerstudent);
     $accicourseurl = acci_course_url($providerstudent, $providercourse, $provider);
     $iframe = generate_iframe($redirecturl, $accicourseurl);
-    echo $iframe;
+    return $iframe;
+}
+
+function back_to_course_button($courseid) {
+    $returnurl = new moodle_url("/course/view.php", array('id' => $courseid));
+    return "<a href=\"$returnurl\" style=\"
+    position:relative
+    z-index:1
+    \"
+    class=\"btn btn-primary btn-md\">
+    Back To Course</a>";
 }
 
 $PAGE->set_url('/mod/extintmaxx/view.php', array('id' => $cm->id));
 $PAGE->set_title('External Integration for Maxx Content');
 
 echo $OUTPUT->header();
-
-
 
 if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::instance($cm->course))) {
     $PAGE->set_context($context);
@@ -131,7 +139,8 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
-    view_page($providerstudent, $providercourse, $provider);
+    echo back_to_course_button($cm->course);
+    echo view_page($providerstudent, $providercourse, $provider);
 }
 
 echo $OUTPUT->footer();

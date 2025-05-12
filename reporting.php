@@ -158,11 +158,19 @@ function render_data_table($caplevel, $adminrecord, $columns = [], $data = [], $
     return $table;
 }
 
+function back_to_course_button($courseid) {
+    $returnurl = new moodle_url("/course/view.php", array('id' => $courseid));
+    return "<a href=\"$returnurl\" class=\"btn btn-primary btn-md\">
+    Back To Course</a>";
+}
+
 echo $OUTPUT->header();
 
 $courseid = $_GET['courseid'];
 
 $PAGE->set_heading(get_string('reporting', 'extintmaxx'));
+
+echo back_to_course_button($courseid);
 
 if (has_capability('mod/extintmaxx:fullreporting', $context = context_system::instance())) {
     $PAGE->set_context($context);
