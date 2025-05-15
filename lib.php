@@ -143,14 +143,16 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
     $adminrecord = $methodchains->admin_record_exists($instance->provider);
     $studentgrades = array();
     if ($userid != 0 && $userid != null) {
-        $studentrecord = $methodchains->student_record_exists($instance->providercourseid, $userid);
-        $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, $studentrecord->provideruserid);
-        $studentcompletion = $studentcoursedata[0]->data->studentcourses->percentage_completed;
-        if ($studentcompletion > 99) {
+        $studentrecord = $methodchains->student_record_exists($userid, $instance->provider, $instance->providercourseid);
+        $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, [$studentrecord['student']->provideruserid]);
+        $studentcompletion = $studentcoursedata[0]->coursedata->data->studentcourses->percentage_completed;
+        if ($studentcompletion > 0) {
+            $studentgrades[$userid] = new stdClass;
             $studentgrades[$userid]->grade = new stdClass;
             $studentgrades[$userid]->grade->userid = $userid;
             $studentgrades[$userid]->grade->rawgrade = $instance->grade;
         } else {
+            $studentgrades[$userid] = new stdClass;
             $studentgrades[$userid]->grade = new stdClass;
             $studentgrades[$userid]->grade->userid = $userid;
             $studentgrades[$userid]->grade->rawgrade = null;
@@ -167,7 +169,7 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
             $currentstudentcourseobjectid = find_array_object_id_by_param_value($students, $studentdata->userid, 'provideruserid');
             $currentstudentid = $students[$currentstudentcourseobjectid]->userid;
             $studentcompletion[$currentstudentid] = $studentdata->coursedata->data->studentcourses->percentage_completed;
-            if ($studentcompletion[$currentstudentid] > 99) {
+            if ($studentcompletion[$currentstudentid] > 0) {
                 $studentgrades[$currentstudentid]->grade = new stdClass;
                 $studentgrades[$currentstudentid]->grade->userid = $currentstudentid;
                 $studentgrades[$currentstudentid]->grade->rawgrade = $instance->grade;

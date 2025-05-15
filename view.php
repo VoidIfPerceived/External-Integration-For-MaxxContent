@@ -28,7 +28,6 @@ $module = $DB->get_record('extintmaxx', array('id' => $cm->instance), '*', MUST_
 $provider = $DB->get_record('extintmaxx_admin', array('provider' => $module->provider), '*');
 $providercourse = $methodchains->provider_record_exists($provider->provider, $module->providercourseid);
 
-
 $PAGE->set_context(context_system::instance());
 
 function admin_actions($courseid) {
@@ -95,16 +94,18 @@ function generate_iframe($redirecturl, $courseforwardurl) {
             width:100%;
             height:740px;\"
         >
-        <iframe id=\"viewurl\" 
-            style=\"
-            position:absolute;
-            top:-67px;
-            height:740px;
-            width:100%;
-            left:0;
-            scrolling:no;\"
-            href=\"$redirecturl\"></iframe></div>
-        <script>var iframe = document.getElementById(\"viewurl\");iframe.contentWindow.document.location.href=\"$courseforwardurl\";</script>";
+            <iframe id=\"viewurl\" 
+                style=\"
+                position:absolute;
+                top:-67px;
+                height:740px;
+                width:100%;
+                left:0;
+                scrolling:no;\"
+                href=\"$redirecturl\">
+            </iframe>
+        </div>
+        <script>var iframe = document.getElementById('viewurl');iframe.contentWindow.document.location.href=\"$courseforwardurl\";</script>";
         return $viewurl;
     }
 }
@@ -116,14 +117,15 @@ function view_page($providerstudent, $providercourse, $provider) {
     return $iframe;
 }
 
-function back_to_course_button($courseid) {
-    $returnurl = new moodle_url("/course/view.php", array('id' => $courseid));
+function exit_activity_button($courseid, $instanceid) {
+    global $USER;
+    $returnurl = new moodle_url("/mod/extintmaxx/process_grade_update.php", array('id' => $courseid, 'instance' => $instanceid, 'userid' => $USER->id));
     return "<a href=\"$returnurl\" style=\"
     position:relative
     z-index:1
     \"
     class=\"btn btn-primary btn-md\">
-    Back To Course</a>";
+    Exit Activity</a>";
 }
 
 $PAGE->set_url('/mod/extintmaxx/view.php', array('id' => $cm->id));
@@ -139,7 +141,7 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
-    echo back_to_course_button($cm->course);
+    echo exit_activity_button($cm->course, $module->id);
     echo view_page($providerstudent, $providercourse, $provider);
 }
 
