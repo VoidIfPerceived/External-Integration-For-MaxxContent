@@ -80,7 +80,7 @@ function update_completion_data($provider) {
     }
 }
 
-function generate_iframe($redirecturl, $courseforwardurl) {
+function generate_iframe($redirecturl) {
     if ($redirecturl == 'invalidlogin') {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
         return $viewurl;
@@ -102,18 +102,19 @@ function generate_iframe($redirecturl, $courseforwardurl) {
                 width:100%;
                 left:0;
                 scrolling:no;\"
-                href=\"$redirecturl\">
+                src=\"https://www.lifeskillslink.com/\">
             </iframe>
-        </div>
-        <script>var iframe = document.getElementById('viewurl');iframe.contentWindow.document.location.href=\"$courseforwardurl\";</script>";
+        </div>";
         return $viewurl;
     }
 }
 
-function view_page($providerstudent, $providercourse, $provider) {
-    $redirecturl = get_redirect_url($providerstudent);
-    $accicourseurl = acci_course_url($providerstudent, $providercourse, $provider);
-    $iframe = generate_iframe($redirecturl, $accicourseurl);
+function iframe_course_redirect($url) {
+    return "<script>var iframe = document.getElementById('viewurl');iframe.contentWindow.document.location.href=\"$url\";</script>";
+}
+
+function view_page($redirecturl) {
+    $iframe = generate_iframe($redirecturl);
     return $iframe;
 }
 
@@ -139,10 +140,14 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     admin_actions($course->id);
 } else {
     $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
+    $redirecturl = get_redirect_url($providerstudent);
+    $courseforwardurl = acci_course_url($providerstudent, $providercourse, $provider);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
     echo exit_activity_button($cm->course, $module->id);
-    echo view_page($providerstudent, $providercourse, $provider);
+    echo view_page($redirecturl);
+    echo iframe_course_redirect($redirecturl);
+    echo iframe_course_redirect($courseforwardurl);
 }
 
 echo $OUTPUT->footer();
