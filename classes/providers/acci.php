@@ -747,6 +747,56 @@ class acci {
      * Admin Login
      *  
      */
+    function student_logout($userid, $consumerkey) {
+        $curl = new curl();
+        $studentlogoutendpoint = "/api/moodle_logout/";
 
+        $options = array(
+            "CURLOPT_FOLLOWLOCATION" => true,
+            "CURLOPT_RETURNTRANSFER" => true
+        );
+
+        $header = array(
+            'accept: application/json',
+        );
+
+        $data = array(
+            "user_id" => $userid,
+            "consumer_key" => $consumerkey,
+        );
+
+        $url = "https://www.lifeskillslink.com{$studentlogoutendpoint}";
+
+        $curl->setHeader($header);
+
+        /**
+         *  @var string $response CURL Response from API, Returns the following data on success:
+         *  @param string $url Full Method URL
+         *  @param array $data Data sent to API
+         *  @param array $options CURL options
+         *  - @return bool status code (status)
+         *  - @return string message (message)
+         *  - @return array data array (data):
+         *      - @return string admintoken (token)
+         *      - @return string student auto login url (redirect_url)
+         */
+
+        $response = $curl->post($url, $data, $options);
+
+        if ($response == false) {
+            echo "Admin Login Curl Error: ";
+            $error = $curl->error;
+            echo $error;
+            return;
+        }
+
+        $responsedata = json_decode($response);
+
+        $studentlogoutstatus = $responsedata->status==true ? "Success" : "Error";
+        $studentlogoutmessage = $responsedata->message;
+        $this->status_message($studentlogoutstatus, $studentlogoutmessage);
+
+        return $responsedata;
+    }
 }
 

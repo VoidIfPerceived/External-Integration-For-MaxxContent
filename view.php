@@ -85,7 +85,7 @@ function generate_iframe($redirecturl) {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
         return $viewurl;
     } else {
-        $viewurl = 
+        echo $viewurl = 
         "<div style=\"
             position: relative; 
             overflow:hidden;
@@ -102,15 +102,17 @@ function generate_iframe($redirecturl) {
                 width:100%;
                 left:0;
                 scrolling:no;\"
-                src=\"https://www.lifeskillslink.com/\">
+                src=\"$redirecturl\">
             </iframe>
         </div>";
-        return $viewurl;
     }
 }
 
 function iframe_course_redirect($url) {
-    return "<script>var iframe = document.getElementById('viewurl');iframe.contentWindow.document.location.href=\"$url\";</script>";
+    return "<script>
+        var iframe = document.getElementById('viewurl');
+        iframe = iframe.src=\"$url\";
+    </script>";
 }
 
 function view_page($redirecturl) {
@@ -139,14 +141,16 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $PAGE->set_pagelayout('standard');
     admin_actions($course->id);
 } else {
+    $acciuserid = $methodchains->student_record_exists($USER->id, $provider->provider);
     $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
     $redirecturl = get_redirect_url($providerstudent);
     $courseforwardurl = acci_course_url($providerstudent, $providercourse, $provider);
+    $logout = $acci->student_logout($acciuserid['student']->provideruserid, $acci->admin_login($provider->providerusername, $provider->providerpassword)->data->user->superadmin->consumer_key);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
     echo exit_activity_button($cm->course, $module->id);
-    echo view_page($redirecturl);
-    echo iframe_course_redirect($redirecturl);
+    view_page($redirecturl);
+    sleep(2);
     echo iframe_course_redirect($courseforwardurl);
 }
 
