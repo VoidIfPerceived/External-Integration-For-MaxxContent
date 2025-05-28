@@ -53,7 +53,7 @@ function acci_course_url($providerstudent, $providercourse, $providerrecord) {
         $currentframeid = $studentcourses->frame_id;
         $nextframeid = $studentcourses->next_frame_id;
         $previousframeid = $studentcourses->previous_frame_id;
-        $courseforwardurl = "https://www.lifeskillslink.com/studentcourse?id=$providercourse->providercourseid&student_id=$providerstudent->provideruserid&fid=$currentframeid&next_frame_id=$nextframeid&previous_frame_id=$previousframeid";
+        $courseforwardurl = "https://www.lifeskillslink.com/studentcourse?id=$providercourse->providercourseid&fid=$currentframeid&next_frame_id=$nextframeid&previous_frame_id=$previousframeid";
     } else {
         $courseforwardurl = "https://www.lifeskillslink.com/studentcourse?id=$providercourse->providercourseid&student_id=$providerstudent->provideruserid";
     }
@@ -80,7 +80,7 @@ function update_completion_data($provider) {
     }
 }
 
-function generate_iframe($redirecturl) {
+function generate_iframe($redirecturl, $courseforwardurl) {
     if ($redirecturl == 'invalidlogin') {
         $viewurl = "<h2>Invalid Login, Please Log In.</h2>";
         return $viewurl;
@@ -104,19 +104,36 @@ function generate_iframe($redirecturl) {
                 scrolling:no;\"
                 src=\"$redirecturl\">
             </iframe>
-        </div>";
+        </div>
+        ";
     }
 }
 
-function iframe_course_redirect($url) {
+function iframe_course_redirect($courseforwardurl) {
     return "<script>
-        var iframe = document.getElementById('viewurl');
-        iframe = iframe.src=\"$url\";
-    </script>";
+            iframe = document.getElementById('viewurl');
+            addEventListener('load', function() {
+                iframe = iframe.contentWindow.location.href = '$courseforwardurl';
+            });
+            </script>";
+    // return "<script>
+    //             var iframe = document.getElementById('viewurl');
+    //             var hasRedirected = false;
+                
+    //             if (hasRedirected == false) {
+    //                 iframe.onload = function() {
+    //                     if (hasRedirected == false) {
+    //                         iframe.contentWindow.location.href = '$courseforwardurl';
+    //                     }
+    //                 }
+    //                 hasRedirected = true;
+    //             }
+    //         });
+    //         </script>";
 }
 
-function view_page($redirecturl) {
-    $iframe = generate_iframe($redirecturl);
+function view_page($redirecturl, $courseforwardurl) {
+    $iframe = generate_iframe($redirecturl, $courseforwardurl);
     return $iframe;
 }
 
@@ -149,8 +166,7 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
     echo exit_activity_button($cm->course, $module->id);
-    view_page($redirecturl);
-    sleep(2);
+    view_page($redirecturl, $courseforwardurl);
     echo iframe_course_redirect($courseforwardurl);
 }
 
