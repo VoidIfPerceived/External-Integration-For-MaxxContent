@@ -109,6 +109,16 @@ function extintmaxx_grade_item_update($instance, $grades=NULL) {
     if (gettype($grades) == 'array') {
         foreach ($grades as $grade) {
             grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, $grade->grade, $params);
+
+            if ($grade->grade->rawgrade == $instance->grade) {
+                $cm = get_coursemodule_from_instance('extintmaxx', $instance->id);
+                if ($cm) {
+                    $completion = new completion_info(get_course($instance->course));
+                    if ($completion->is_enabled($cm)) {
+                        $completion->update_state($cm, COMPLETION_COMPLETE, $grade->grade->userid);
+                    }
+                }
+            }
         }
     } else {
         grade_update('mod/extintmaxx', $instance->course, 'mod', 'extintmaxx', $instance->id, 0, null, $params);
