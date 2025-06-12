@@ -66,6 +66,7 @@ function extintmaxx_update_instance($instancedata, $mform): bool {
 
     $instancedata->timemodified = time();
     $instancedata->id = $instancedata->instance;
+    $instancedata->introformat = $instancedata->introformat ?? $instancedata->introformat || FORMAT_HTML;
 
     extintmaxx_grade_item_update($instancedata);
 
@@ -82,7 +83,6 @@ function extintmaxx_supports($feature) {
     switch ($feature) {
         case FEATURE_GRADE_HAS_GRADE: return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
-        case FEATURE_COMPLETION_HAS_RULES: return true;
         default: return null;
     }
 }
@@ -156,7 +156,7 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
         $studentrecord = $methodchains->student_record_exists($userid, $instance->provider, $instance->providercourseid);
         $studentcoursedata = $methodchains->get_students_course_data($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $instance->provider, $instance->providercourseid, [$studentrecord['student']->provideruserid]);
         $studentcompletion = $studentcoursedata[0]->coursedata->data->studentcourses->percentage_completed;
-        if ($studentcompletion > 99) {
+        if ($studentcompletion > 2) {
             $studentgrades[$userid] = new stdClass;
             $studentgrades[$userid]->grade = new stdClass;
             $studentgrades[$userid]->grade->userid = $userid;
@@ -179,7 +179,7 @@ function extintmaxx_get_user_grades($instance, $userid = 0) {
             $currentstudentcourseobjectid = find_array_object_id_by_param_value($students, $studentdata->userid, 'provideruserid');
             $currentstudentid = $students[$currentstudentcourseobjectid]->userid;
             $studentcompletion[$currentstudentid] = $studentdata->coursedata->data->studentcourses->percentage_completed;
-            if ($studentcompletion[$currentstudentid] > 99) {
+            if ($studentcompletion[$currentstudentid] > 2) {
                 $studentgrades[$currentstudentid]->grade = new stdClass;
                 $studentgrades[$currentstudentid]->grade->userid = $currentstudentid;
                 $studentgrades[$currentstudentid]->grade->rawgrade = $instance->grade;

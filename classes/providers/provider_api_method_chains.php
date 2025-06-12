@@ -163,20 +163,29 @@ class provider_api_method_chains {
      * @param string $provider
      * @return object $redirecturl
      */
-    function student_login($userid, $provider, $module) {
+    function student_login($userid, $provider, $module, $instanceid) {
+        global $DB;
         $acci = new acci();
         $adminrecord = $this->admin_record_exists($provider);
-        $studentrecord = $this->student_record_exists($userid, $provider, $module->providercourseid);
-        if ($adminrecord && $studentrecord['student'] == null) {
+        $studentrecord = $DB->get_record(
+            'extintmaxx_user',
+            array(
+                'userid' => $userid,
+                'provider' => $provider,
+                'providercourseid' => $module->providercourseid,
+                'instanceid' => $instanceid
+            )
+        );
+        if ($adminrecord && $studentrecord == null) {
             //If user has an entry for this provider in the database
             //Return student info
             return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord, $module);
-        } else if ($adminrecord && $studentrecord['student'] && $studentrecord['student']->providercourseid != $module->providercourseid) {
+        } else if ($adminrecord && $studentrecord && $studentrecord->providercourseid != $module->providercourseid) {
             //If user has an entry for this provider in the database
             //Return student info
             return $this->enroll_student($acci->admin_login($adminrecord->providerusername, $adminrecord->providerpassword), $adminrecord, $module);
-        } else if ($adminrecord && $studentrecord['student']) {
-            return $studentrecord['student'];
+        } else if ($adminrecord && $studentrecord) {
+            return $studentrecord;
             //If user does not have an entry for this provider in the database
             //Parse new data and submit to API 
         }

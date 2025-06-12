@@ -158,11 +158,14 @@ if (has_capability('mod/extintmaxx:basicreporting', $context = context_course::i
     $PAGE->set_pagelayout('standard');
     admin_actions($course->id);
 } else {
-    $acciuserid = $methodchains->student_record_exists($USER->id, $provider->provider);
-    $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module);
+    $acciuserid = $DB->get_record(
+        'extintmaxx_user',
+        array('userid' => $USER->id, 'provider' => $provider->provider, 'instanceid' => $module->id)
+    );
+    $providerstudent = $methodchains->student_login($USER->id, $provider->provider, $module, $module->id);
     $redirecturl = get_redirect_url($providerstudent);
     $courseforwardurl = acci_course_url($providerstudent, $providercourse, $provider);
-    $logout = $acci->student_logout($acciuserid['student']->provideruserid, $acci->admin_login($provider->providerusername, $provider->providerpassword)->data->user->superadmin->consumer_key);
+    $logout = $acci->student_logout($acciuserid->provideruserid, $acci->admin_login($provider->providerusername, $provider->providerpassword)->data->user->superadmin->consumer_key);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('incourse');
     echo exit_activity_button($cm->course, $module->id);
